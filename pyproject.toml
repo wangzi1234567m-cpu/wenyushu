@@ -1,0 +1,16 @@
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+markers = ["postgres: requires isolated PostgreSQL TEST_DATABASE_URL"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/alembic/versions/*.py" = ["E501"]
+"backend/tests/test_postgres.py" = ["E501"]
+
