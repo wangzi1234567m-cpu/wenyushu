@@ -1,0 +1,2293 @@
+openapi: 3.1.0
+info:
+  title: 问与书 Web MVP API
+  version: 1.0.0
+  description: SAD V1.0 的外部 API 契约。所有 UUID 都是服务端验证的资源引用，不能用 UUID 代替鉴权。SSE 分片由服务端安全检查后发送，断线从消息列表恢复已完成消息。
+servers:
+- url: /api/v1
+tags:
+- name: Auth
+- name: Content
+- name: Exploration
+- name: Reading
+- name: Catalog
+- name: Conversation
+- name: Handoff
+- name: Safety
+- name: Health
+paths:
+  /auth/anonymous-session:
+    post:
+      tags:
+      - Auth
+      summary: 签发匿名会话 Cookie 与 CSRF Token
+      operationId: createAnonymousSession
+      responses:
+        '201':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionCreated'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters: []
+    delete:
+      tags:
+      - Auth
+      summary: 撤销匿名会话
+      operationId: revokeAnonymousSession
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+  /health/live:
+    get:
+      tags:
+      - Health
+      summary: 应用进程健康
+      operationId: healthLive
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters: []
+  /health/ready:
+    get:
+      tags:
+      - Health
+      summary: 数据库及必需依赖就绪
+      operationId: healthReady
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters: []
+  /topics:
+    get:
+      tags:
+      - Content
+      summary: 列出当前可用思辨议题
+      operationId: listTopics
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Topic'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 20
+  /questions/daily:
+    get:
+      tags:
+      - Content
+      summary: 获取北京时间今日一问
+      operationId: getDailyQuestion
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyQuestion'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters: []
+  /explorations:
+    post:
+      tags:
+      - Exploration
+      summary: 创建一次固定题目版本的探索
+      operationId: createExploration
+      responses:
+        '201':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplorationState'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExplorationCreate'
+  /explorations/{exploration_id}:
+    get:
+      tags:
+      - Exploration
+      summary: 查询探索状态与当前步骤
+      operationId: getExploration
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplorationState'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: exploration_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ActorCookieAuth: []
+  /explorations/{exploration_id}/answers:
+    post:
+      tags:
+      - Exploration
+      summary: 提交当前选项，可能产生阅读意图
+      operationId: answerExploration
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplorationState'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: exploration_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExplorationAnswer'
+  /reading-intents:
+    post:
+      tags:
+      - Reading
+      summary: 创建独立找书阅读意图
+      operationId: createReadingIntent
+      responses:
+        '201':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingIntentCreated'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingIntentCreate'
+  /recommendations:
+    post:
+      tags:
+      - Reading
+      summary: 启动异步推荐任务
+      operationId: createRecommendationJob
+      responses:
+        '202':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationJob'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description: 同一 actor + key 同请求须复用任务；不同请求内容返回 409
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationCreate'
+  /recommendations/{job_id}:
+    get:
+      tags:
+      - Reading
+      summary: 查询推荐任务及结果
+      operationId: getRecommendationJob
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationJob'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ActorCookieAuth: []
+  /books/{work_id}:
+    get:
+      tags:
+      - Catalog
+      summary: 查询已核验书籍资料
+      operationId: getBookDetail
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: work_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ActorCookieAuth: []
+  /conversations:
+    post:
+      tags:
+      - Conversation
+      summary: 创建思辨会话
+      operationId: createConversation
+      responses:
+        '201':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationCreate'
+  /conversations/{conversation_id}:
+    get:
+      tags:
+      - Conversation
+      summary: 获取会话状态
+      operationId: getConversation
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ActorCookieAuth: []
+    delete:
+      tags:
+      - Conversation
+      summary: 删除会话及归属消息
+      operationId: deleteConversation
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+  /conversations/{conversation_id}/messages:
+    get:
+      tags:
+      - Conversation
+      summary: 查询历史消息（断线恢复）
+      operationId: listConversationMessages
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationMessagePage'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: after_seq
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 30
+      security:
+      - ActorCookieAuth: []
+    post:
+      tags:
+      - Conversation
+      summary: 发送思辨消息并通过 SSE 获取回复
+      operationId: sendConversationMessage
+      responses:
+        '200':
+          description: 成功
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: 'SSE event stream; event: message_started | message_delta | message_completed
+                  | message_error; data: JSON encoded event payload. Error after headers are sent is signaled
+                  by event: message_error, not HTTP error code.'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationMessageCreate'
+  /reading-handoffs:
+    post:
+      tags:
+      - Handoff
+      summary: 基于指定会话快照按需找书
+      operationId: createHandoff
+      responses:
+        '202':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffJob'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+        description: 同一 actor + key 同请求须复用任务；不同请求内容返回 409
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HandoffCreate'
+  /reading-handoffs/{handoff_id}:
+    get:
+      tags:
+      - Handoff
+      summary: 查询阅读联动任务
+      operationId: getHandoff
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffJob'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: handoff_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      security:
+      - ActorCookieAuth: []
+  /reports:
+    post:
+      tags:
+      - Safety
+      summary: 提交不适宜内容举报
+      operationId: createReport
+      responses:
+        '201':
+          description: 已创建或已接受
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportCreated'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 服务器签发，绑定当前访问身份
+      security:
+      - ActorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCreate'
+components:
+  securitySchemes:
+    ActorCookieAuth:
+      type: apiKey
+      in: cookie
+      name: wqs_session
+      description: HttpOnly Secure session cookie. CSRF header additionally required for write actions.
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        retryable:
+          type: boolean
+        request_id:
+          type: string
+      additionalProperties: false
+      required:
+      - code
+      - message
+      - retryable
+      - request_id
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+      additionalProperties: false
+      required:
+      - error
+    SessionCreated:
+      type: object
+      properties:
+        expires_at:
+          type: string
+          format: date-time
+        csrf_token:
+          type: string
+      additionalProperties: false
+      required:
+      - expires_at
+      - csrf_token
+      description: 'Set-Cookie: wqs_session=...; HttpOnly; Secure; SameSite=Lax'
+    Topic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        audience:
+          type: string
+          enum:
+          - adult
+          - teen
+          - child
+          - all
+      additionalProperties: false
+      required:
+      - id
+      - slug
+      - title
+      - audience
+    Option:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+      additionalProperties: false
+      required:
+      - id
+      - label
+    QuestionStep:
+      type: object
+      properties:
+        id:
+          type: string
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
+        optional:
+          type: boolean
+      additionalProperties: false
+      required:
+      - id
+      - prompt
+      - options
+      - optional
+    DailyQuestion:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        question_version_id:
+          type: string
+          format: uuid
+        local_date:
+          type: string
+          format: date
+        timezone:
+          type: string
+        title:
+          type: string
+        intro:
+          type: string
+        topic:
+          $ref: '#/components/schemas/Topic'
+        first_step:
+          $ref: '#/components/schemas/QuestionStep'
+      additionalProperties: false
+      required:
+      - question_id
+      - question_version_id
+      - local_date
+      - timezone
+      - title
+      - intro
+      - topic
+      - first_step
+    ExplorationCreate:
+      type: object
+      properties:
+        question_version_id:
+          type: string
+          format: uuid
+      additionalProperties: false
+      required:
+      - question_version_id
+    ExplorationAnswer:
+      type: object
+      properties:
+        step_id:
+          type: string
+        option_id:
+          type: string
+      additionalProperties: false
+      required:
+      - step_id
+      - option_id
+    ExplorationState:
+      type: object
+      properties:
+        exploration_id:
+          type: string
+          format: uuid
+        question_version_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - active
+          - completed
+          - expired
+        next_step:
+          anyOf:
+          - $ref: '#/components/schemas/QuestionStep'
+          - type: 'null'
+        reading_intent_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - exploration_id
+      - question_version_id
+      - status
+      - next_step
+      - reading_intent_id
+    ReadingPreferences:
+      type: object
+      properties:
+        genre:
+          anyOf:
+          - type: string
+          - type: 'null'
+        style:
+          type: array
+          items:
+            type: string
+        difficulty:
+          anyOf:
+          - type: string
+            enum:
+            - easy
+            - medium
+            - advanced
+          - type: 'null'
+        language:
+          type: string
+          enum:
+          - zh-CN
+      additionalProperties: false
+      required:
+      - genre
+      - style
+      - difficulty
+      - language
+    ReadingIntentCreate:
+      type: object
+      properties:
+        source_type:
+          type: string
+          enum:
+          - direct_search
+        purpose:
+          type: string
+          enum:
+          - interest
+          - learning
+          - exploration
+        central_question:
+          anyOf:
+          - type: string
+            maxLength: 1200
+          - type: 'null'
+        topics:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        focus:
+          anyOf:
+          - type: string
+            maxLength: 1200
+          - type: 'null'
+        preferences:
+          $ref: '#/components/schemas/ReadingPreferences'
+      additionalProperties: false
+      required:
+      - source_type
+      - purpose
+      - central_question
+      - topics
+      - focus
+      - preferences
+    ReadingIntentCreated:
+      type: object
+      properties:
+        reading_intent_id:
+          type: string
+          format: uuid
+        schema_version:
+          type: integer
+          const: 1
+      additionalProperties: false
+      required:
+      - reading_intent_id
+      - schema_version
+    RecommendationCreate:
+      type: object
+      properties:
+        reading_intent_id:
+          type: string
+          format: uuid
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 3
+      additionalProperties: false
+      required:
+      - reading_intent_id
+    VerifiedBook:
+      type: object
+      properties:
+        work_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          type: string
+        summary:
+          type: string
+        recommendation_reason:
+          type: string
+        rank:
+          type: integer
+          minimum: 1
+          maximum: 3
+        verification_status:
+          type: string
+          enum:
+          - verified
+        evidence_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+      additionalProperties: false
+      required:
+      - work_id
+      - title
+      - author
+      - summary
+      - recommendation_reason
+      - rank
+      - verification_status
+      - evidence_urls
+    TaskError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        retryable:
+          type: boolean
+      additionalProperties: false
+      required:
+      - code
+      - message
+      - retryable
+    RecommendationJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - succeeded
+          - partial
+          - failed
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerifiedBook'
+          maxItems: 3
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/TaskError'
+          - type: 'null'
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - job_id
+      - status
+      - items
+      - error
+      - created_at
+      - completed_at
+    BookDetail:
+      type: object
+      properties:
+        work_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          type: string
+        original_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+        editions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              isbn13:
+                anyOf:
+                - type: string
+                - type: 'null'
+              publisher:
+                anyOf:
+                - type: string
+                - type: 'null'
+              translator:
+                anyOf:
+                - type: string
+                - type: 'null'
+            additionalProperties: false
+            required:
+            - id
+            - isbn13
+            - publisher
+            - translator
+        verified_topics:
+          type: array
+          items:
+            type: string
+        evidence_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+      additionalProperties: false
+      required:
+      - work_id
+      - title
+      - author
+      - original_title
+      - editions
+      - verified_topics
+      - evidence_urls
+    ConversationCreate:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - discussion
+        topic_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - kind
+      - topic_id
+    Conversation:
+      type: object
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - discussion
+        topic_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - active
+          - closed
+          - expired
+        last_message_seq:
+          type: integer
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+      required:
+      - conversation_id
+      - kind
+      - topic_id
+      - status
+      - last_message_seq
+      - created_at
+    ConversationMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        seq:
+          type: integer
+          minimum: 1
+        role:
+          type: string
+          enum:
+          - user
+          - assistant
+        status:
+          type: string
+          enum:
+          - pending
+          - generating
+          - completed
+          - failed
+          - blocked
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+      required:
+      - id
+      - seq
+      - role
+      - status
+      - content
+      - created_at
+    ConversationMessagePage:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+        next_after_seq:
+          anyOf:
+          - type: integer
+            minimum: 0
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - messages
+      - next_after_seq
+    ConversationMessageCreate:
+      type: object
+      properties:
+        client_message_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      additionalProperties: false
+      required:
+      - client_message_id
+      - content
+    HandoffCreate:
+      type: object
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+        up_to_seq:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 3
+      additionalProperties: false
+      required:
+      - conversation_id
+      - up_to_seq
+    HandoffJob:
+      type: object
+      properties:
+        handoff_id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        up_to_seq:
+          type: integer
+          minimum: 0
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - succeeded
+          - partial
+          - failed
+        topic_summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+        reading_intent_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        recommendation_job_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/TaskError'
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - handoff_id
+      - conversation_id
+      - up_to_seq
+      - status
+      - topic_summary
+      - reading_intent_id
+      - recommendation_job_id
+      - error
+    ReportCreate:
+      type: object
+      properties:
+        target_type:
+          type: string
+          enum:
+          - message
+          - recommendation
+        target_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+          - harmful
+          - inaccurate
+          - copyright
+          - privacy
+          - other
+        detail:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+      additionalProperties: false
+      required:
+      - target_type
+      - target_id
+      - reason
+      - detail
+    ReportCreated:
+      type: object
+      properties:
+        report_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - open
+      additionalProperties: false
+      required:
+      - report_id
+      - status
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+          - degraded
+      additionalProperties: false
+      required:
+      - status
+    Ok:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          const: true
+      additionalProperties: false
+      required:
+      - ok
+x-contract-rules:
+  all_writes_require_csrf_except_anonymous_session_creation: true
+  request_id_response_header: X-Request-ID
+  all_resource_reads_require_authorization_checks: true
+  conversation_stream_events:
+    message_started:
+      type: object
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        seq:
+          type: integer
+      additionalProperties: false
+      required:
+      - message_id
+      - session_id
+      - seq
+    message_delta:
+      type: object
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        delta:
+          type: string
+      additionalProperties: false
+      required:
+      - message_id
+      - delta
+    message_completed:
+      type: object
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        seq:
+          type: integer
+        status:
+          type: string
+          enum:
+          - completed
+      additionalProperties: false
+      required:
+      - message_id
+      - seq
+      - status
+    message_error:
+      type: object
+      properties:
+        message_id:
+          type: string
+          format: uuid
+        error:
+          $ref: '#/components/schemas/Error'
+      additionalProperties: false
+      required:
+      - message_id
+      - error
+  policy: SSE 中途出错由 message_error 传输；重连 GET /messages 可恢复完成消息，不支持原 token 流原位恢复。来自内部 Provider 的 reasoning 字段不可透传。
