@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from app.api.dto import StrictDto
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 
 class Topic(StrictDto):
@@ -29,6 +29,8 @@ class QuestionStep(StrictDto):
     prompt: str
     options: list[Option]
     optional: bool
+    multiple: bool = False
+    source_url: str = Field(default=None)
 
 
 class DailyQuestion(StrictDto):
@@ -49,6 +51,7 @@ class ExplorationCreate(StrictDto):
 class ExplorationAnswer(StrictDto):
     step_id: str
     option_id: str
+    option_ids: list[str] | None = Field(default=None, min_length=1, max_length=6)
     supplementary_text: Annotated[str, Field(max_length=300)] | None = None
 
     @field_validator("supplementary_text", mode="before")
@@ -59,6 +62,18 @@ class ExplorationAnswer(StrictDto):
                 raise ValueError("Supplement exceeds 300 characters")
             return value.strip() or None
         return value
+
+    @model_validator(mode="after")
+    def normalize_selection(self):
+        if self.option_ids is not None:
+            if (
+                len(set(self.option_ids)) != len(self.option_ids)
+                or self.option_id not in self.option_ids
+            ):
+                raise ValueError("Invalid multiple selection")
+            self.option_ids = sorted(self.option_ids)
+            self.option_id = self.option_ids[0]
+        return self
 
 
 class ExplorationAnswerRecord(ExplorationAnswer):

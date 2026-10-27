@@ -21,16 +21,24 @@ START = datetime(2026, 10, 27, tzinfo=UTC)
 
 @pytest.fixture(scope="module")
 def seeded(engine):
+    import app.modules.content.infrastructure.seed as seed_module
+
+    patch = pytest.MonkeyPatch()
+    patch.setattr(seed_module, "SEED_VERSION", 2)
+    patch.setattr(seed_module, "discussion_flow", lambda flow, *_: flow)
     factory = sessionmaker(engine)
     seed_content(factory, START.date())
     seed_catalog(factory)
     seed_content(factory, START.date())
-    return engine
+    yield engine
+    patch.undo()
 
 
 @pytest.fixture
 def app(seeded):
     settings = Settings(
+        _env_file=None,
+        provider="mock",
         database_url=__import__("os").environ["TEST_DATABASE_URL"],
         csrf_secret="test-daily-secret-at-least-32-characters",
         environment="test",

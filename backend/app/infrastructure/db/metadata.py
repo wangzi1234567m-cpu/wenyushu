@@ -9,6 +9,7 @@ OWNERS = (
     "content",
     "exploration",
     "conversation",
+    "discussion",
     "reading",
     "catalog",
     "handoff",

@@ -11,7 +11,7 @@ from pydantic import ValidationError
         {"csrf_secret": "short"},
         {"allowed_origins": ["*"]},
         {"environment": "production", "allowed_origins": ["http://localhost:3000"]},
-        {"provider": "deepseek"},
+        {"provider": "unsupported"},
     ],
 )
 def test_unsafe_or_unimplemented_configuration_rejected(settings, changes):

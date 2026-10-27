@@ -46,7 +46,12 @@ class SqlExplorationRepository:
         state["answers"] = [
             dict(r)
             for r in s.execute(
-                select(answers.c.step_id, answers.c.option_id, answers.c.supplementary_text)
+                select(
+                    answers.c.step_id,
+                    answers.c.option_id,
+                    answers.c.option_ids,
+                    answers.c.supplementary_text,
+                )
                 .where(answers.c.exploration_id == exploration_id)
                 .order_by(answers.c.submitted_at, answers.c.id)
             ).mappings()
@@ -74,6 +79,7 @@ class SqlExplorationRepository:
             return self._load(s, actor_id, exploration_id, now, True)
 
     def submit(self, actor_id, exploration_id, answer, version, now):
+        answer = {"option_ids": None, **answer}
         with self.factory.begin() as s:
             state = self._load(s, actor_id, exploration_id, now, True)
             if state["status"] == "expired":
@@ -91,6 +97,13 @@ class SqlExplorationRepository:
             option = next((o for o in step.options if o.id == answer["option_id"]), None)
             if option is None:
                 raise ApplicationError("INVALID_EXPLORATION_STEP", "选项不属于当前步骤")
+            ids = answer.get("option_ids") or [answer["option_id"]]
+            if (not step.multiple and len(ids) > 1) or any(
+                key not in {o.id for o in step.options} for key in ids
+            ):
+                raise ApplicationError("INVALID_EXPLORATION_STEP", "选项不属于当前步骤")
+            if "other" in ids and not answer.get("supplementary_text"):
+                raise ApplicationError("INVALID_INPUT", "选择其他时，请补充你的想法")
             s.execute(insert(answers).values(exploration_id=exploration_id, **answer))
             s.execute(
                 update(explorations)

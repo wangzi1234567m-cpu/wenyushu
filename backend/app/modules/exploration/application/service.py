@@ -52,16 +52,16 @@ class ExplorationService:
             topics, focus, style = [], [], []
             genre = None
             for item in self._ordered_answers(state, version):
-                option = next(
-                    o for o in flow.steps[item["step_id"]].options if o.id == item["option_id"]
-                )
-                topics.extend(option.topics)
-                if option.focus:
-                    focus.append(option.focus)
+                selected = item.get("option_ids") or [item["option_id"]]
+                for option in flow.steps[item["step_id"]].options:
+                    if option.id in selected:
+                        topics.extend(option.topics)
+                        if option.focus:
+                            focus.append(option.focus)
+                        genre = option.genre or genre
+                        style.extend(option.style)
                 if item.get("supplementary_text"):
                     focus.append(item["supplementary_text"])
-                genre = option.genre or genre
-                style.extend(option.style)
             intent_id = self.reading.create_daily(
                 DailyReadingIntent(
                     actor_id=actor_id,
@@ -89,10 +89,10 @@ class ExplorationService:
                 {
                     **answer,
                     "step_prompt": validated_flow(version).steps[answer["step_id"]].prompt,
-                    "option_label": next(
+                    "option_label": "、".join(
                         o.label
                         for o in validated_flow(version).steps[answer["step_id"]].options
-                        if o.id == answer["option_id"]
+                        if o.id in (answer.get("option_ids") or [answer["option_id"]])
                     ),
                 }
                 for answer in self._ordered_answers(state, version)
@@ -110,3 +110,24 @@ class ExplorationService:
                 o.next_step_id for o in flow.steps[key].options if o.id == answer["option_id"]
             )
         return result
+
+    def discussion_seed(self, actor_id: UUID, exploration_id: UUID) -> dict:
+        from app.shared.errors import ApplicationError
+
+        state = self.repo.get(actor_id, exploration_id, self.clock())
+        if state["status"] != "completed":
+            raise ApplicationError("INVALID_EXPLORATION_STEP", "请先完成立场与理由的选择")
+        version = self.content.version(state["question_version_id"], True)
+        response = self._response(state, version)
+        return {
+            "question": version["title"],
+            "question_version_id": str(version["id"]),
+            "answers": [
+                {
+                    "question": a["step_prompt"],
+                    "selection": a["option_label"],
+                    "supplement": a.get("supplementary_text"),
+                }
+                for a in response["answers"]
+            ],
+        }

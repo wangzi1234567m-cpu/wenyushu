@@ -1,6 +1,7 @@
 """Baseline persistence mapping; no business workflow is implemented here."""
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import JSONB
 
 from app.infrastructure.db.base import Base
 
@@ -50,6 +51,12 @@ exploration_answers_table = sa.Table(
     ),
     sa.Column("step_id", sa.String(96), nullable=False),
     sa.Column("option_id", sa.String(96), nullable=False),
+    sa.Column("option_ids", JSONB(none_as_null=True)),
+    sa.CheckConstraint(
+        "option_ids IS NULL OR (jsonb_typeof(option_ids) = 'array' "
+        "AND jsonb_array_length(option_ids) BETWEEN 1 AND 6)",
+        name="ck_answer_option_ids",
+    ),
     sa.Column("supplementary_text", sa.String(300)),
     sa.Column(
         "submitted_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")

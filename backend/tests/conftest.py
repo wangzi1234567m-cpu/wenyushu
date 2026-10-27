@@ -55,6 +55,8 @@ class MemoryUow:
 @pytest.fixture
 def settings():
     return Settings(
+        _env_file=None,
+        provider="mock",
         database_url="postgresql+psycopg://test:test@localhost/wqs_test",
         csrf_secret="test-only-secret-which-is-not-for-production",
         allowed_origins=["https://testserver"],
@@ -114,6 +116,7 @@ def engine():
             "identity",
             "content",
             "conversation",
+            "discussion",
             "reading",
             "catalog",
             "handoff",

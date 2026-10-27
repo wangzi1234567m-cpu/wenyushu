@@ -17,7 +17,7 @@ from app.modules.content.infrastructure.models import (
 QUESTIONS = [
     (
         "love-choice",
-        "如果能让喜欢的人也爱上你，你会使用这种能力吗？",
+        "假如你有超能力，可以让你爱的人也爱你，你要不要使用这项超能力？",
         "爱情与选择",
         "relationships",
     ),
@@ -29,7 +29,7 @@ QUESTIONS = [
     ("understand", "被理解与被陪伴，哪个更重要？", "理解与陪伴", "relationships"),
 ]
 
-SEED_VERSION = 2
+SEED_VERSION = 3
 STANCES = [
     ("会，我希望拥有这份爱情", "不会，我希望对方自由选择"),
     ("独处更像一种自由", "独处更像一种失去"),
@@ -160,6 +160,7 @@ def seed_content(factory, start, publish_current_version=False):
             for option, label in zip(flow["steps"]["stance"]["options"][:2], STANCES[index]):
                 option["label"] = label
             flow["steps"]["stance"]["options"][2]["label"] = "取决于具体情况，我还没想好"
+            flow = discussion_flow(flow, index == 0, theme)
             intro = "这个问题没有标准答案。选一个接近当下想法的方向，也可以补充你的看法。"
             existing = (
                 s.execute(
@@ -205,3 +206,50 @@ def seed_content(factory, start, publish_current_version=False):
             else:
                 schedule = schedule.on_conflict_do_nothing()
             s.execute(schedule)
+
+
+def discussion_flow(flow, love_question, theme):
+    """Version 3: two deliberate choices before open discussion; old versions stay immutable."""
+    flow["steps"].pop("preference")
+    if love_question:
+        sides = {
+            "reason_yes": [
+                "想争取一次双向相爱的机会",
+                "感情能否持续，仍取决于彼此相处",
+                "如果后来仍可离开，就不等于永久束缚",
+                "比起错过，我更愿意尝试建立关系",
+            ],
+            "reason_no": [
+                "对方应保留选择爱谁的自由",
+                "我会一直怀疑这份爱的来由",
+                "单方面掌控会削弱关系中的平等",
+                "我珍惜双方自然靠近的过程",
+            ],
+        }
+    else:
+        sides = {
+            key: [o["label"] for o in flow["steps"][key]["options"]]
+            for key in ("reason_yes", "reason_no")
+        }
+    sides["reason_unsure"] = [
+        sides["reason_yes"][0],
+        sides["reason_no"][0],
+        "我想先听听不同角度，再形成自己的看法",
+    ]
+    flow["steps"]["stance"]["options"][2]["next_step_id"] = "reason_unsure"
+    for key, labels in sides.items():
+        flow["steps"][key] = {
+            "id": key,
+            "prompt": "哪些理由更接近你的想法？可以多选，也可以自己补充。",
+            "multiple": True,
+            "options": [
+                {"id": f"reason_{i + 1}", "label": label, "topics": [theme], "focus": label}
+                for i, label in enumerate(labels)
+            ]
+            + [{"id": "other", "label": "其他，我想自己补充", "topics": [theme]}],
+        }
+        if love_question:
+            flow["steps"][key]["source_url"] = (
+                "https://debatetimer.cn/record/66a0f2c5a92f8e067c57d797"
+            )
+    return QuestionFlow.model_validate(flow).model_dump()

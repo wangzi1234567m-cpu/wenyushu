@@ -25,7 +25,7 @@ def test_metadata_matches_migration(engine):
             MigrationContext.configure(conn, opts={"include_schemas": True}), metadata
         )
         assert changes == []
-        assert len(metadata.tables) == 18
+        assert len(metadata.tables) == 19
         for table in metadata.sorted_tables:
             assert inspect(conn).has_table(table.name, schema=table.schema)
 
@@ -41,6 +41,11 @@ def test_frozen_migration_matches_reference_sql():
     spec.loader.exec_module(module)
     baseline = (ROOT / "db/schema.sql").read_text(encoding="utf-8")
     # Design reference now includes ADR-012; frozen 0001 must remain unchanged.
+    baseline = re.sub(
+        r"-- ADR-013:.*?CREATE TABLE discussion.contexts \(.*?\);", "", baseline, flags=re.S
+    )
+    baseline = baseline.replace("    option_ids jsonb,\n", "")
+    baseline = re.sub(r"    CONSTRAINT ck_answer_option_ids[^\n]+\n", "", baseline)
     baseline = baseline.replace("    supplementary_text varchar(300),\n", "")
     baseline = re.sub(r"CREATE UNIQUE INDEX uq_daily_intent_source[^;]+;", "", baseline)
     baseline = re.sub(r"--[^\n]*", "", baseline)
@@ -240,6 +245,8 @@ def test_database_constraints(engine):
 
 def test_real_identity_roundtrip(engine):
     settings = Settings(
+        _env_file=None,
+        provider="mock",
         database_url=os.environ["TEST_DATABASE_URL"],
         csrf_secret="isolated-test-secret-not-for-production",
         environment="test",

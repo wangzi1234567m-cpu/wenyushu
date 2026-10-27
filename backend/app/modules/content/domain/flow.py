@@ -20,6 +20,8 @@ class FlowStep(BaseModel):
     id: str
     prompt: str
     optional: bool = False
+    multiple: bool = False
+    source_url: str | None = None
     options: list[FlowOption] = Field(min_length=2, max_length=8)
 
 
@@ -40,6 +42,8 @@ class QuestionFlow(BaseModel):
                 raise ValueError("Step/option identities must be unique")
             if step.optional and not any(o.id == "skip" for o in step.options):
                 raise ValueError("Optional steps require a server-defined skip option")
+            if step.multiple and len({o.next_step_id for o in step.options}) != 1:
+                raise ValueError("Multiple selections must share a successor")
             path = visited | {key}
             if len(path) > 3:
                 raise ValueError("Daily exploration must fit within three steps")
@@ -58,6 +62,8 @@ class QuestionFlow(BaseModel):
             "id": step.id,
             "prompt": step.prompt,
             "optional": step.optional,
+            "multiple": step.multiple,
+            **({"source_url": step.source_url} if step.source_url else {}),
             "options": [
                 {
                     "id": o.id,

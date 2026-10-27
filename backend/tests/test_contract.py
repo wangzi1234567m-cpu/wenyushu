@@ -31,6 +31,9 @@ def test_full_contract_and_implemented_runtime(foundation):
         "/api/v1/health/live",
         "/api/v1/health/ready",
         "/api/v1/topics",
+        "/api/v1/conversations",
+        "/api/v1/conversations/{conversation_id}",
+        "/api/v1/conversations/{conversation_id}/messages",
         "/api/v1/questions/daily",
         "/api/v1/explorations",
         "/api/v1/explorations/{exploration_id}",
@@ -48,10 +51,15 @@ def test_full_contract_and_implemented_runtime(foundation):
                 normalize(operation.get("parameters", [])), key=lambda p: (p["in"], p["name"])
             ) == sorted(normalize(expected["parameters"]), key=lambda p: (p["in"], p["name"]))
             for status, response in operation["responses"].items():
-                assert normalize(response["content"]["application/json"]["schema"]) == normalize(
-                    expected["responses"][status]["content"]["application/json"]["schema"]
+                assert normalize(response["content"]) == normalize(
+                    expected["responses"][status]["content"]
                 )
     for name in (
+        "ConversationCreate",
+        "Conversation",
+        "ConversationMessage",
+        "ConversationMessagePage",
+        "ConversationMessageCreate",
         "SessionCreated",
         "HealthStatus",
         "Ok",

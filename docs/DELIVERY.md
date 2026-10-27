@@ -43,6 +43,8 @@ wenyushu/
 
 ## C. 分阶段开发与验收
 
+**2026-10-27 范围修订（用户明确要求，ADR-013）**：本次 P1 改为立场→多选理由与补充→真实 DeepSeek 持续讨论；将必要的 ConversationRuntime/DiscussionPolicy 前移到同一分支。推荐入口只导航到独立预留页，不触发推荐或检索。P1 需增加流式、消息幂等/失败/并发/越权、上下文摘要及刷新恢复验收。下表为原始阶段基线；本次 P1 以此修订及 `acceptance/P1_DISCUSSION.md` 为准。P2 的书目检索核验、P3 剩余质量/安全验收、P4 Handoff 仍分别验收，不因本次实现视为完成。
+
 | 阶段 | 分支 | 交付边界 | 最低自动化检查 | 人工验收 | Tag |
 |---|---|---|---|---|---|
 | P0 基础工程 | `feat/p0-foundation` | Next/FastAPI/PG/Compose、Alembic、匿名 Cookie 与 CSRF、OpenAPI、健康检查、CI、Mock provider | CI 绿；迁移空库成功；health 200；越权测试 | 在 Win11 本地一条命令运行；无真 Key 能看到首页骨架 | `mvp-p0` |

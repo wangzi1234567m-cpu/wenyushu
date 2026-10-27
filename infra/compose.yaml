@@ -3,12 +3,14 @@ x-backend: &backend
   build:
     context: ..
     dockerfile: backend/Dockerfile
+  env_file:
+    - path: ../.env
+      required: false
   environment: &environment
     DATABASE_URL: postgresql+psycopg://wqs:${POSTGRES_PASSWORD:?run scripts/dev.py up}@postgres:5432/wenyushu
     CSRF_SECRET: ${CSRF_SECRET:?run scripts/dev.py up}
     ALLOWED_ORIGINS: '["http://localhost:3000"]'
     ENVIRONMENT: development
-    PROVIDER: mock
 
 services:
   postgres:

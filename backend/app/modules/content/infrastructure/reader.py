@@ -82,7 +82,7 @@ class SqlContentReader:
                         versions.c.status == "published",
                         versions.c.flow_json["fallback"].as_boolean().is_(True),
                     )  # noqa: E712
-                    .order_by(versions.c.created_at, versions.c.id)
+                    .order_by(versions.c.created_at.desc(), versions.c.id)
                 )
             )
         for index, version_id in enumerate(candidates):

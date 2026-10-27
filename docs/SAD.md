@@ -106,6 +106,8 @@ flowchart LR
 
 ### 4.3 独立思辨→持续讨论
 
+**ADR-013（2026-10-27，用户批准范围修订）**：每日一问新版本改为两步选择后进入真实讨论，理由可多选。探索答案增加可选 option_ids；ConversationCreate 增加可选 exploration_id。discussion 应用协调器经探索快照端口校验归属和完成状态，再经 ConversationSessionPort 创建通用会话。discussion.contexts 唯一保存固定题目及初始选择，conversation 仅负责通用消息和摘要；API 只调用应用服务。旁栏找书只导航到预留页，未实现 Handoff 或搜索。旧题目版本与旧意图保持不变；聊天本身不创建意图或推荐任务。0003 增量迁移与 OpenAPI 同步，见 `adr/013-daily-discussion.md`。
+
 `POST /conversations(kind=discussion)` → `POST /conversations/{id}/messages` SSE；ConversationRuntime 负责顺序、记忆、流式、安全、失败恢复。**正常讨论不调用推荐模块、不创建 ReadingIntent**。用户在前端可一直聊、不被主动导购打断。
 
 ### 4.4 用户主动点击「根据讨论找书」

@@ -47,6 +47,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -104,6 +110,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -178,6 +190,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -236,6 +254,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -300,6 +324,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -374,6 +404,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -432,6 +468,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -512,6 +554,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -578,6 +626,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -664,6 +718,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -736,6 +796,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -824,6 +890,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -894,6 +966,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -960,6 +1038,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -1040,6 +1124,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -1105,6 +1195,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -1181,6 +1277,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -1273,6 +1375,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -1351,6 +1459,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -1439,6 +1553,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
         '409':
           description: 失败时遵循统一错误契约
           content:
@@ -1505,6 +1625,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 资源不存在或当前身份无权访问
           content:
             application/json:
               schema:
@@ -1640,24 +1766,36 @@ components:
       - id
       - label
     QuestionStep:
-      type: object
       properties:
         id:
           type: string
+          title: Id
         prompt:
           type: string
+          title: Prompt
         options:
-          type: array
           items:
             $ref: '#/components/schemas/Option'
+          type: array
+          title: Options
         optional:
           type: boolean
+          title: Optional
+        multiple:
+          type: boolean
+          title: Multiple
+          default: false
+        source_url:
+          type: string
+          title: Source Url
       additionalProperties: false
+      type: object
       required:
       - id
       - prompt
       - options
       - optional
+      title: QuestionStep
     DailyQuestion:
       type: object
       properties:
@@ -1700,22 +1838,34 @@ components:
       required:
       - question_version_id
     ExplorationAnswer:
-      type: object
       properties:
         step_id:
           type: string
+          title: Step Id
         option_id:
           type: string
+          title: Option Id
+        option_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 6
+            minItems: 1
+          - type: 'null'
+          title: Option Ids
         supplementary_text:
           anyOf:
           - type: string
             maxLength: 300
           - type: 'null'
-          description: 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。
+          title: Supplementary Text
       additionalProperties: false
+      type: object
       required:
       - step_id
       - option_id
+      title: ExplorationAnswer
     ExplorationState:
       type: object
       properties:
@@ -1996,49 +2146,69 @@ components:
       - verified_topics
       - evidence_urls
     ConversationCreate:
-      type: object
       properties:
         kind:
           type: string
-          enum:
-          - discussion
+          const: discussion
+          title: Kind
         topic_id:
           anyOf:
           - type: string
             format: uuid
           - type: 'null'
+          title: Topic Id
+        exploration_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Exploration Id
       additionalProperties: false
+      type: object
       required:
       - kind
       - topic_id
+      title: ConversationCreate
     Conversation:
-      type: object
       properties:
         conversation_id:
           type: string
           format: uuid
+          title: Conversation Id
         kind:
           type: string
-          enum:
-          - discussion
+          const: discussion
+          title: Kind
         topic_id:
           anyOf:
           - type: string
             format: uuid
           - type: 'null'
+          title: Topic Id
         status:
           type: string
           enum:
           - active
           - closed
           - expired
+          title: Status
         last_message_seq:
           type: integer
-          minimum: 0
+          minimum: 0.0
+          title: Last Message Seq
         created_at:
           type: string
           format: date-time
+          title: Created At
+        provider_mode:
+          type: string
+          enum:
+          - mock
+          - deepseek
+          title: Provider Mode
+          default: mock
       additionalProperties: false
+      type: object
       required:
       - conversation_id
       - kind
@@ -2046,20 +2216,23 @@ components:
       - status
       - last_message_seq
       - created_at
+      title: Conversation
     ConversationMessage:
-      type: object
       properties:
         id:
           type: string
           format: uuid
+          title: Id
         seq:
           type: integer
-          minimum: 1
+          minimum: 1.0
+          title: Seq
         role:
           type: string
           enum:
           - user
           - assistant
+          title: Role
         status:
           type: string
           enum:
@@ -2068,12 +2241,16 @@ components:
           - completed
           - failed
           - blocked
+          title: Status
         content:
           type: string
+          title: Content
         created_at:
           type: string
           format: date-time
+          title: Created At
       additionalProperties: false
+      type: object
       required:
       - id
       - seq
@@ -2081,37 +2258,44 @@ components:
       - status
       - content
       - created_at
+      title: ConversationMessage
     ConversationMessagePage:
-      type: object
       properties:
         messages:
-          type: array
           items:
             $ref: '#/components/schemas/ConversationMessage'
+          type: array
+          title: Messages
         next_after_seq:
           anyOf:
           - type: integer
-            minimum: 0
+            minimum: 0.0
           - type: 'null'
+          title: Next After Seq
       additionalProperties: false
+      type: object
       required:
       - messages
       - next_after_seq
+      title: ConversationMessagePage
     ConversationMessageCreate:
-      type: object
       properties:
         client_message_id:
           type: string
-          minLength: 1
           maxLength: 128
+          minLength: 1
+          title: Client Message Id
         content:
           type: string
-          minLength: 1
           maxLength: 4000
+          minLength: 1
+          title: Content
       additionalProperties: false
+      type: object
       required:
       - client_message_id
       - content
+      title: ConversationMessageCreate
     HandoffCreate:
       type: object
       properties:
@@ -2243,26 +2427,40 @@ components:
       required:
       - ok
     ExplorationAnswerRecord:
-      type: object
       properties:
         step_id:
           type: string
+          title: Step Id
         option_id:
           type: string
+          title: Option Id
+        option_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+            maxItems: 6
+            minItems: 1
+          - type: 'null'
+          title: Option Ids
         supplementary_text:
           anyOf:
           - type: string
             maxLength: 300
           - type: 'null'
-          description: 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。
+          title: Supplementary Text
         step_prompt:
           type: string
+          title: Step Prompt
         option_label:
           type: string
+          title: Option Label
       additionalProperties: false
+      type: object
       required:
       - step_id
       - option_id
+      title: ExplorationAnswerRecord
 x-contract-rules:
   all_writes_require_csrf_except_anonymous_session_creation: true
   request_id_response_header: X-Request-ID
