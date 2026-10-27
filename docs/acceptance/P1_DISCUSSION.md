@@ -1,6 +1,6 @@
 # P1 修订交付：立场、理由与持续讨论
 
-日期：2026-10-27。分支 `feat/p1-daily-exploration`；PR [#3](https://github.com/wangzi1234567m-cpu/wenyushu/pull/3)。P0 已验收合并；P1 保持草稿，等待用户人工验收，不合并 main、不打 Tag、不部署生产。提交 SHA 以 PR 当前 head 及交付回复为准。
+日期：2026-10-27。分支 `feat/p1-daily-exploration`；PR [#3](https://github.com/wangzi1234567m-cpu/wenyushu/pull/3)。实现提交 `4083983c0b174cb615a1aa251562bc01d475dafb`，其后补充本交付证据的提交见PR。P0 已验收合并；P1 保持草稿，等待用户人工验收，不合并 main、不打 Tag、不部署生产。
 
 ## 当前行为与数据流
 
@@ -49,7 +49,8 @@ DeepSeek 采用[官方 Chat Completions](https://api-docs.deepseek.com/api/creat
 | 分层/契约/迁移 | PASS | 架构检查、完整OpenAPI与运行路由/DTO/SSE校验；空库升级、重复升级、降级再升级、19表反射与元数据一致 |
 | 前端及响应式 | PASS | lint/typecheck/build；1440px与390px浏览器10项测试；检查桌面及手机截图无水平溢出 |
 | 密钥保护 | PASS | .env被Git忽略；前端静态JS及预览服务日志未包含配置的Key；不记录原始凭证或用户正文 |
-| 当前提交CI | FAIL（提交前尚未运行） | 推送后核对当前SHA，不引用旧版CI冒充通过 |
+| 实现提交CI | PASS | [运行40512930994](https://github.com/wangzi1234567m-cpu/wenyushu/actions/runs/40512930994)，SHA 4083983；backend/frontend/compose-browser全部success，文档补充提交的状态另见[PR当前检查](https://github.com/wangzi1234567m-cpu/wenyushu/pull/3/checks) |
+| Linux Compose | PASS | 同运行实际构建镜像、空库迁移/导入、ready检查、10项浏览器测试及停止服务均success |
 | Win11 Docker Compose | FAIL（本轮未验证） | 本轮使用原生PostgreSQL；上轮Docker引擎不可用，本轮不据此冒称容器启动通过 |
 | 用户人工验收 | FAIL（待验收） | 以下人工步骤等待用户执行及内容审阅 |
 
@@ -125,6 +126,6 @@ HTTP /api/v1/questions/daily → 200
 
 基础每日轮次上限按持久消息计数，失败重试及删除后计数并非严格计费额度控制；生产前还需补齐独立调用预算及滥用防护。摘要使用UTF-8字节保守估算预算，质量与成本需后续真实长对话评估。Win11 Compose本轮未实际启动，不能由原生验证或Linux CI替代。
 
-回滚优先在功能分支revert本次代码提交，保留数据库及数据卷；0003是添加式结构，旧版代码可在保留新列/表的库上运行，但旧版ready版本检查需与保留迁移头同步，不能把ready失败误当数据库损坏。排期若需恢复版本2，用内容维护流程显式发布旧版本，已有探索仍按固定版本完成。不执行reset/clean、删数据卷或生产降级。
+真实模型出现故障时，可先将本机PROVIDER切换为mock并重启后端，界面会明确显示Mock；保留会话与数据。彻底代码回滚应在功能分支revert问题提交，并保留0003迁移、健康检查迁移头和题目版本3的解析兼容代码，再通过旧版内容维护流程显式恢复版本2排期。直接恢复全部旧代码会使ready版本不匹配，也无法解析新版本题目，不能将它当作无风险回滚。已有探索的固定版本不改写。不执行reset/clean、删数据卷或生产降级。
 
 `alembic downgrade 0002_daily_exploration` 会删除多选信息及讨论背景，**只用于明确可丢弃测试库**；运行中开发库应先备份并停止服务，未得到数据丢弃授权不执行。`.env`保留，密钥不因代码回滚写入Git。
