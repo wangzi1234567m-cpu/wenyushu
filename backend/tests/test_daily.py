@@ -274,11 +274,11 @@ def test_zero_samples_fail_without_fabrication(daily_client, app, monkeypatch):
 
 def test_published_seed_cannot_be_overwritten(seeded):
     from app.modules.content.infrastructure.models import question_versions_table
-    from app.modules.content.infrastructure.seed import QUESTIONS, stable_id
+    from app.modules.content.infrastructure.seed import QUESTIONS, SEED_VERSION, stable_id
     from sqlalchemy import update
 
     factory = sessionmaker(seeded)
-    key = stable_id(QUESTIONS[0][0] + ":v1")
+    key = stable_id(QUESTIONS[0][0] + f":v{SEED_VERSION}")
     with seeded.connect() as conn:
         original = conn.scalar(
             select(question_versions_table.c.title).where(question_versions_table.c.id == key)
@@ -349,7 +349,7 @@ def test_new_published_version_does_not_change_existing_exploration(daily_client
             .mappings()
             .one()
         )
-        row.update(id=new_id, version=2, title="新版本问题")
+        row.update(id=new_id, version=row["version"] + 1, title="新版本问题")
         conn.execute(insert(question_versions_table).values(**row))
         conn.execute(
             update(daily_schedules_table)

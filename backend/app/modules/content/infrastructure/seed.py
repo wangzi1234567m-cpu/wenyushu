@@ -29,6 +29,17 @@ QUESTIONS = [
     ("understand", "被理解与被陪伴，哪个更重要？", "理解与陪伴", "relationships"),
 ]
 
+SEED_VERSION = 2
+STANCES = [
+    ("会，我希望拥有这份爱情", "不会，我希望对方自由选择"),
+    ("独处更像一种自由", "独处更像一种失去"),
+    ("我更看重规则", "我更看重公平"),
+    ("是，关系可能随着成长改变", "不一定，我愿意主动维系"),
+    ("会，我愿意保留现在的生活", "不会，我想重新选择"),
+    ("是，更多选择带来更多可能", "不一定，选择也可能带来负担"),
+    ("被理解更重要", "被陪伴更重要"),
+]
+
 
 def stable_id(value):
     return uuid5(NAMESPACE_URL, "wenyushu:daily:" + value)
@@ -127,11 +138,11 @@ def make_flow(theme, fallback=False):
     return QuestionFlow.model_validate(data).model_dump()
 
 
-def seed_content(factory, start):
+def seed_content(factory, start, publish_current_version=False):
     with factory.begin() as s:
         for index, (slug, title, topic_title, theme) in enumerate(QUESTIONS):
             topic_id, question_id, version_id = (
-                stable_id(slug + suffix) for suffix in (":topic", ":question", ":v1")
+                stable_id(slug + suffix) for suffix in (":topic", ":question", f":v{SEED_VERSION}")
             )
             s.execute(
                 insert(topics_table)
@@ -146,6 +157,9 @@ def seed_content(factory, start):
                 .on_conflict_do_nothing()
             )
             flow = make_flow(theme, index == 0)
+            for option, label in zip(flow["steps"]["stance"]["options"][:2], STANCES[index]):
+                option["label"] = label
+            flow["steps"]["stance"]["options"][2]["label"] = "取决于具体情况，我还没想好"
             intro = "这个问题没有标准答案。选一个接近当下想法的方向，也可以补充你的看法。"
             existing = (
                 s.execute(
@@ -167,7 +181,7 @@ def seed_content(factory, start):
                 .values(
                     id=version_id,
                     question_id=question_id,
-                    version=1,
+                    version=SEED_VERSION,
                     title=title,
                     intro=intro,
                     flow_json=flow,
@@ -176,13 +190,18 @@ def seed_content(factory, start):
                 )
                 .on_conflict_do_nothing()
             )
-            s.execute(
-                insert(daily_schedules_table)
-                .values(
-                    local_date=start + timedelta(days=index),
-                    question_version_id=version_id,
-                    audience="adult",
-                    status="published",
-                )
-                .on_conflict_do_nothing()
+            schedule = insert(daily_schedules_table)
+            schedule = schedule.values(
+                local_date=start + timedelta(days=index),
+                question_version_id=version_id,
+                audience="adult",
+                status="published",
             )
+            if publish_current_version:
+                schedule = schedule.on_conflict_do_update(
+                    index_elements=["local_date", "audience"],
+                    set_={"question_version_id": version_id, "status": "published"},
+                )
+            else:
+                schedule = schedule.on_conflict_do_nothing()
+            s.execute(schedule)

@@ -49,9 +49,13 @@ alembic -c backend/alembic.ini upgrade head
 python -m app.bootstrap.seed_daily
 # 也可固定排期起点
 python -m app.bootstrap.seed_daily --start-date 2026-10-27
+# 明确将新内容版本发布到所选7天排期；旧探索仍引用原版本
+python -m app.bootstrap.seed_daily --start-date 2026-10-27 --publish-current-version
 ```
 
 重复执行不覆盖已有排期或题目；已有题目内容与脚本不一致时拒绝并要求创建新版本。维护动作不开放公共HTTP接口。自动化测试只连接名称以_test结尾的隔离空库。
+
+当前种子内容版本为2，第一步使用对应题目的具体立场标签。默认不覆盖已有排期；已有版本1环境可由维护者使用 --publish-current-version 明确更新排期，版本1记录和已进行的探索不变。
 
 ## 固定样例的事实依据
 

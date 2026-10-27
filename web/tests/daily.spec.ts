@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 async function begin(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "开始探索", exact: true }).click();
-  await page.getByRole("radio", { name: "我更认同前一种想法", exact: true }).check();
+  await page.getByRole("radio").first().check();
 }
 
 test("daily exploration, restore, explicit recommendation and revision", async ({ page }) => {
