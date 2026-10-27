@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function begin(page: import("@playwright/test").Page) {
-  await page.goto("/");
+  await page.goto("/daily-question");
   await page.getByRole("button", { name: "开始探索", exact: true }).click();
   await page.getByRole("radio").first().check();
 }

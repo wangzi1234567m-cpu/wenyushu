@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, routeTestApi } from "./fixtures";
 
 test("homepage, secure anonymous cookie, refresh and actor isolation", async ({ page, context, browser }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("走向一本好书");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("带你走向下一本书");
   await expect(page.getByRole("status").filter({ hasText: "匿名访问已就绪" })).toHaveText("匿名访问已就绪");
   const cookie = (await context.cookies()).find((item) => item.name === "wqs_session")!;
   expect(cookie).toBeDefined();
@@ -15,6 +15,7 @@ test("homepage, secure anonymous cookie, refresh and actor isolation", async ({ 
   expect((await context.cookies()).find((item) => item.name === "wqs_session")?.value).toBe(cookie.value);
   const other = await browser.newContext();
   const second = await other.newPage();
+  await routeTestApi(second);
   await second.goto(page.url());
   await expect(second.getByRole("status").filter({ hasText: "匿名访问已就绪" })).toHaveText("匿名访问已就绪");
   expect((await other.cookies()).find((item) => item.name === "wqs_session")?.value).not.toBe(cookie.value);
