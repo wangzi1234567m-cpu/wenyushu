@@ -50,6 +50,7 @@ exploration_answers_table = sa.Table(
     ),
     sa.Column("step_id", sa.String(96), nullable=False),
     sa.Column("option_id", sa.String(96), nullable=False),
+    sa.Column("supplementary_text", sa.String(300)),
     sa.Column(
         "submitted_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")
     ),

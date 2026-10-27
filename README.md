@@ -4,6 +4,8 @@
 
 ## P0 本地运行
 
+P1 每日一问已在独立功能分支实现；本地启动入口仍为 `python scripts/dev.py up`，会按当前日期导入7天排期及固定样例。P1 的数据流、内容维护和 Mock 边界见 `docs/P1_DATA_FLOW.md`，实际验收见 `docs/acceptance/P1.md`。
+
 当前已增加基础工程；实际验收状态见 `docs/acceptance/P0.md`。以下原交付包说明保留作基线背景。
 
 前置：Python 3.13、Docker Desktop（Linux containers，Compose v2）。不需要 DeepSeek Key。

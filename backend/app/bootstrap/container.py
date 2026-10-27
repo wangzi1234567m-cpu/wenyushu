@@ -6,11 +6,19 @@ from app.integrations.llm.mock import MockLLM
 from app.integrations.llm.ports import LLMPort
 from app.integrations.search.mock import MockSearch
 from app.integrations.search.ports import SearchPort
+from app.modules.catalog.infrastructure.reader import SqlBookCatalog
+from app.modules.content.application.ports import DailyQuestionReader
+from app.modules.content.infrastructure.reader import SqlContentReader
+from app.modules.exploration.application.service import ExplorationService
+from app.modules.exploration.infrastructure.repository import SqlExplorationRepository
 from app.modules.identity.application.ports import AuthorizationPort
 from app.modules.identity.application.service import IdentityService
 from app.modules.identity.domain.actor import OwnerAuthorization
 from app.modules.identity.infrastructure.csrf import SignedCsrf
 from app.modules.identity.infrastructure.repository import SqlIdentityUnitOfWork
+from app.modules.reading.application.service import MockRecommendationPort, ReadingService
+from app.modules.reading.infrastructure.repository import SqlReadingRepository
+from app.modules.safety.application.ports import BasicTextSafety
 from app.shared.health import HealthService
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,6 +31,9 @@ class Services:
     authorization: AuthorizationPort
     llm: LLMPort
     search: SearchPort
+    content: DailyQuestionReader | None = None
+    exploration: ExplorationService | None = None
+    reading: ReadingService | None = None
 
 
 def build_services(settings: Settings):
@@ -43,5 +54,12 @@ def build_services(settings: Settings):
         OwnerAuthorization(),
         MockLLM(),
         MockSearch(),
+    )
+    services.content = SqlContentReader(factory)
+    services.reading = ReadingService(
+        SqlReadingRepository(factory), MockRecommendationPort(SqlBookCatalog(factory))
+    )
+    services.exploration = ExplorationService(
+        SqlExplorationRepository(factory), services.content, services.reading, BasicTextSafety()
     )
     return services, engine

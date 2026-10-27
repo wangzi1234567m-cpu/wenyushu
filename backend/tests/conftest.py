@@ -1,8 +1,12 @@
 import copy
+import os
 from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from app.bootstrap.container import Services
 from app.infrastructure.settings.config import Settings
 from app.integrations.llm.mock import MockLLM
@@ -13,6 +17,8 @@ from app.modules.identity.domain.actor import OwnerAuthorization
 from app.modules.identity.infrastructure.csrf import SignedCsrf
 from app.shared.health import HealthService
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.engine import make_url
 
 
 class MemoryUow:
@@ -86,3 +92,41 @@ def client(foundation):
         headers={"Origin": "https://testserver"},
     ) as client:
         yield client
+
+
+ROOT = Path(__file__).parents[2]
+
+
+@pytest.fixture(scope="module")
+def engine():
+    url = os.environ.get("TEST_DATABASE_URL")
+    if not url:
+        pytest.skip("TEST_DATABASE_URL not configured; PostgreSQL acceptance not passed")
+    assert make_url(url).database.endswith("_test"), "Refusing non-test database"
+    old = os.environ.get("DATABASE_URL")
+    os.environ["DATABASE_URL"] = url
+    config = Config(str(ROOT / "backend/alembic.ini"))
+    db = create_engine(url, connect_args={"connect_timeout": 3})
+    # Existing business schemas must not be overwritten.
+    with db.connect() as conn:
+        schemas = inspect(conn).get_schema_names()
+        assert not set(schemas) & {
+            "identity",
+            "content",
+            "conversation",
+            "reading",
+            "catalog",
+            "handoff",
+            "safety",
+        }, "Tests require an empty disposable database"
+    command.upgrade(config, "head")
+    command.upgrade(config, "head")
+    yield db
+    command.downgrade(config, "base")
+    command.upgrade(config, "head")
+    command.downgrade(config, "base")
+    db.dispose()
+    if old is None:
+        os.environ.pop("DATABASE_URL", None)
+    else:
+        os.environ["DATABASE_URL"] = old

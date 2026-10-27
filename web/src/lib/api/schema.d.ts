@@ -372,6 +372,8 @@ export interface components {
         ExplorationAnswer: {
             step_id: string;
             option_id: string;
+            /** @description 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。 */
+            supplementary_text?: string | null;
         };
         ExplorationState: {
             /** Format: uuid */
@@ -382,6 +384,8 @@ export interface components {
             status: "active" | "completed" | "expired";
             next_step: components["schemas"]["QuestionStep"] | null;
             reading_intent_id: string | null;
+            /** @description 仅返回当前身份该探索的已提交答案，按提交顺序排列。 */
+            answers?: components["schemas"]["ExplorationAnswerRecord"][];
         };
         ReadingPreferences: {
             genre: string | null;
@@ -535,6 +539,14 @@ export interface components {
         Ok: {
             /** @constant */
             ok: true;
+        };
+        ExplorationAnswerRecord: {
+            step_id: string;
+            option_id: string;
+            /** @description 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。 */
+            supplementary_text?: string | null;
+            step_prompt?: string;
+            option_label?: string;
         };
     };
     responses: never;

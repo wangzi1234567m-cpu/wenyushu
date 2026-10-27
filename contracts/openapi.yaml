@@ -1251,9 +1251,10 @@ paths:
             text/event-stream:
               schema:
                 type: string
-                description: 'SSE event stream; event: message_started | message_delta | message_completed
-                  | message_error; data: JSON encoded event payload. Error after headers are sent is signaled
-                  by event: message_error, not HTTP error code.'
+                description: 'SSE event stream; event: message_started | message_delta
+                  | message_completed | message_error; data: JSON encoded event payload.
+                  Error after headers are sent is signaled by event: message_error,
+                  not HTTP error code.'
         '400':
           description: 失败时遵循统一错误契约
           content:
@@ -1559,7 +1560,8 @@ components:
       type: apiKey
       in: cookie
       name: wqs_session
-      description: HttpOnly Secure session cookie. CSRF header additionally required for write actions.
+      description: HttpOnly Secure session cookie. CSRF header additionally required
+        for write actions.
   schemas:
     Error:
       type: object
@@ -1704,6 +1706,12 @@ components:
           type: string
         option_id:
           type: string
+        supplementary_text:
+          anyOf:
+          - type: string
+            maxLength: 300
+          - type: 'null'
+          description: 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。
       additionalProperties: false
       required:
       - step_id
@@ -1732,6 +1740,12 @@ components:
           - type: string
             format: uuid
           - type: 'null'
+        answers:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/ExplorationAnswerRecord'
+          description: 仅返回当前身份该探索的已提交答案，按提交顺序排列。
       additionalProperties: false
       required:
       - exploration_id
@@ -2228,6 +2242,27 @@ components:
       additionalProperties: false
       required:
       - ok
+    ExplorationAnswerRecord:
+      type: object
+      properties:
+        step_id:
+          type: string
+        option_id:
+          type: string
+        supplementary_text:
+          anyOf:
+          - type: string
+            maxLength: 300
+          - type: 'null'
+          description: 可选补充表达，首尾空白去除后为空归一为 null；不改变 P1 分支。
+        step_prompt:
+          type: string
+        option_label:
+          type: string
+      additionalProperties: false
+      required:
+      - step_id
+      - option_id
 x-contract-rules:
   all_writes_require_csrf_except_anonymous_session_creation: true
   request_id_response_header: X-Request-ID
@@ -2290,4 +2325,5 @@ x-contract-rules:
       required:
       - message_id
       - error
-  policy: SSE 中途出错由 message_error 传输；重连 GET /messages 可恢复完成消息，不支持原 token 流原位恢复。来自内部 Provider 的 reasoning 字段不可透传。
+  policy: SSE 中途出错由 message_error 传输；重连 GET /messages 可恢复完成消息，不支持原 token 流原位恢复。来自内部
+    Provider 的 reasoning 字段不可透传。

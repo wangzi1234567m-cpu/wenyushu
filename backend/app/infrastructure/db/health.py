@@ -1,7 +1,7 @@
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-EXPECTED_REVISION = "0001_foundation"
+EXPECTED_REVISION = "0002_daily_exploration"
 
 
 def database_ready(engine: Engine) -> bool:

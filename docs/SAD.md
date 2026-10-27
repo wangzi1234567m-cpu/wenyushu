@@ -92,6 +92,8 @@ flowchart LR
 
 ### 4.1 每日一问→书单
 
+**P1 补充（ADR-012，用户批准 2026-10-27）**：探索采用选项加可选 supplementary_text（每步最多300字符），文字不改变 P1 题目分支。ExplorationState 返回当前身份的 answers 及用于恢复展示的题干/选项标签。改答建立同版本新探索并重放有效前缀；完成流程通过 ReadingIntentCommand 按 actor+来源幂等创建意图，再由 exploration 关联完成。P1 推荐由 MockRecommendationPort 演示，真实模型和 Search 留 P2。
+
 1. `GET /questions/daily` 用北京时间固定当日已发布 `question_version`；不存在时使用已审核备用题（记录告警）。
 2. `POST /explorations` 固定 `question_version_id`。服务端由内容快照校验选项，客户端不能自造 `topic_tag`。
 3. `POST /explorations/{id}/answers` 校验合法选项、选项所属当前步骤、幂等；对话期内锁定版本。完成时内部创建 ReadingIntent，并返回 ID。

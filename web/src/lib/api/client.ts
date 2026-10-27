@@ -10,10 +10,13 @@ export class ApiError extends Error {
 }
 
 let csrfToken: string | undefined;
-async function request<T>(path: string, method: string): Promise<T> {
+export async function request<T>(path: string, method: string, body?: unknown, key?: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     method, credentials: "same-origin", cache: "no-store",
-    headers: csrfToken ? { "X-CSRF-Token": csrfToken } : {},
+    headers: { ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+      ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+      ...(key ? { "Idempotency-Key": key } : {}) },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) {

@@ -76,6 +76,7 @@ CREATE TABLE content.exploration_answers (
     exploration_id uuid NOT NULL REFERENCES content.explorations(id) ON DELETE CASCADE,
     step_id varchar(96) NOT NULL,
     option_id varchar(96) NOT NULL,
+    supplementary_text varchar(300),
     submitted_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE(exploration_id,step_id)
 );
@@ -137,6 +138,7 @@ CREATE TABLE reading.intents (
     created_at timestamptz NOT NULL DEFAULT now(),
     expires_at timestamptz
 );
+CREATE UNIQUE INDEX uq_daily_intent_source ON reading.intents(actor_id,source_type,source_ref_id) WHERE source_type = 'daily_question' AND source_ref_id IS NOT NULL;
 CREATE INDEX ix_intents_actor ON reading.intents(actor_id,created_at DESC);
 CREATE TABLE reading.recommendation_jobs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -2,12 +2,14 @@ from typing import Annotated
 
 from app.api.dependencies import health_service
 from app.api.dto import ERROR_RESPONSES, HealthStatus
+from app.api.v1.daily import router as daily_router
 from app.modules.identity.api.routes import router as identity_router
 from app.shared.health import HealthService
 from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(identity_router)
+router.include_router(daily_router)
 
 
 @router.get(

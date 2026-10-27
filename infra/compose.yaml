@@ -26,7 +26,7 @@ services:
       retries: 20
   migrate:
     <<: *backend
-    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    command: ["sh", "-c", "alembic -c backend/alembic.ini upgrade head && python -m app.bootstrap.seed_daily"]
     depends_on:
       postgres:
         condition: service_healthy
