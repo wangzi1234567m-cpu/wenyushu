@@ -10,6 +10,9 @@ CONTRACT = yaml.safe_load((ROOT / "contracts/openapi.yaml").read_text(encoding="
 
 def normalize(value):
     if isinstance(value, dict):
+        if "enum" in value and len(value["enum"]) == 1:
+            value = {**value, "const": value["enum"][0]}
+            value.pop("enum")
         return {
             k: normalize(v)
             for k, v in value.items()
@@ -20,13 +23,23 @@ def normalize(value):
     return value
 
 
-def test_full_contract_and_p0_runtime(foundation):
+def test_full_contract_and_implemented_runtime(foundation):
     validate(CONTRACT)
     actual = foundation[0].openapi()
     assert set(actual["paths"]) == {
         "/api/v1/auth/anonymous-session",
         "/api/v1/health/live",
         "/api/v1/health/ready",
+        "/api/v1/topics",
+        "/api/v1/conversations",
+        "/api/v1/conversations/{conversation_id}",
+        "/api/v1/conversations/{conversation_id}/messages",
+        "/api/v1/questions/daily",
+        "/api/v1/explorations",
+        "/api/v1/explorations/{exploration_id}",
+        "/api/v1/explorations/{exploration_id}/answers",
+        "/api/v1/recommendations",
+        "/api/v1/recommendations/{job_id}",
     }
     for path, methods in actual["paths"].items():
         for method, operation in methods.items():
@@ -34,13 +47,37 @@ def test_full_contract_and_p0_runtime(foundation):
             assert operation["operationId"] == expected["operationId"]
             assert set(operation["responses"]) == set(expected["responses"])
             assert operation.get("security", []) == expected.get("security", [])
-            assert normalize(operation.get("parameters", [])) == normalize(expected["parameters"])
+            assert sorted(
+                normalize(operation.get("parameters", [])), key=lambda p: (p["in"], p["name"])
+            ) == sorted(normalize(expected["parameters"]), key=lambda p: (p["in"], p["name"]))
             for status, response in operation["responses"].items():
-                assert (
-                    response["content"]["application/json"]["schema"]
-                    == expected["responses"][status]["content"]["application/json"]["schema"]
+                assert normalize(response["content"]) == normalize(
+                    expected["responses"][status]["content"]
                 )
-    for name in ("SessionCreated", "HealthStatus", "Ok", "Error", "ErrorEnvelope"):
+    for name in (
+        "ConversationCreate",
+        "Conversation",
+        "ConversationMessage",
+        "ConversationMessagePage",
+        "ConversationMessageCreate",
+        "SessionCreated",
+        "HealthStatus",
+        "Ok",
+        "Error",
+        "ErrorEnvelope",
+        "Topic",
+        "Option",
+        "QuestionStep",
+        "DailyQuestion",
+        "ExplorationCreate",
+        "ExplorationAnswer",
+        "ExplorationAnswerRecord",
+        "ExplorationState",
+        "RecommendationCreate",
+        "VerifiedBook",
+        "TaskError",
+        "RecommendationJob",
+    ):
         assert normalize(actual["components"]["schemas"][name]) == normalize(
             CONTRACT["components"]["schemas"][name]
         )

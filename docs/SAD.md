@@ -92,6 +92,8 @@ flowchart LR
 
 ### 4.1 每日一问→书单
 
+**P1 补充（ADR-012，用户批准 2026-10-27）**：探索采用选项加可选 supplementary_text（每步最多300字符），文字不改变 P1 题目分支。ExplorationState 返回当前身份的 answers 及用于恢复展示的题干/选项标签。改答建立同版本新探索并重放有效前缀；完成流程通过 ReadingIntentCommand 按 actor+来源幂等创建意图，再由 exploration 关联完成。P1 推荐由 MockRecommendationPort 演示，真实模型和 Search 留 P2。
+
 1. `GET /questions/daily` 用北京时间固定当日已发布 `question_version`；不存在时使用已审核备用题（记录告警）。
 2. `POST /explorations` 固定 `question_version_id`。服务端由内容快照校验选项，客户端不能自造 `topic_tag`。
 3. `POST /explorations/{id}/answers` 校验合法选项、选项所属当前步骤、幂等；对话期内锁定版本。完成时内部创建 ReadingIntent，并返回 ID。
@@ -103,6 +105,8 @@ flowchart LR
 `POST /reading-intents` 将选择或文字转换成标准意图（有自由文本时可经 LLM 语义归纳，需限流），之后走同一 RecommendationPort。默认返回1—3本书。搜索不足就少给，不凑数。
 
 ### 4.3 独立思辨→持续讨论
+
+**ADR-013（2026-10-27，用户批准范围修订）**：每日一问新版本改为两步选择后进入真实讨论，理由可多选。探索答案增加可选 option_ids；ConversationCreate 增加可选 exploration_id。discussion 应用协调器经探索快照端口校验归属和完成状态，再经 ConversationSessionPort 创建通用会话。discussion.contexts 唯一保存固定题目及初始选择，conversation 仅负责通用消息和摘要；API 只调用应用服务。旁栏找书只导航到预留页，未实现 Handoff 或搜索。旧题目版本与旧意图保持不变；聊天本身不创建意图或推荐任务。0003 增量迁移与 OpenAPI 同步，见 `adr/013-daily-discussion.md`。
 
 `POST /conversations(kind=discussion)` → `POST /conversations/{id}/messages` SSE；ConversationRuntime 负责顺序、记忆、流式、安全、失败恢复。**正常讨论不调用推荐模块、不创建 ReadingIntent**。用户在前端可一直聊、不被主动导购打断。
 

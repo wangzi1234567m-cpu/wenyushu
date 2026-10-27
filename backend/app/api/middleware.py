@@ -67,7 +67,10 @@ class RequestGuard:
             iterator = iter(messages)
 
             async def replay():
-                return next(iterator, {"type": "http.request", "body": b"", "more_body": False})
+                try:
+                    return next(iterator)
+                except StopIteration:
+                    return await receive()
 
             await self.app(scope, replay, safe_send)
         except Exception:

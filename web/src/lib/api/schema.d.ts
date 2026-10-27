@@ -346,11 +346,23 @@ export interface components {
             label: string;
             description?: string;
         };
+        /** QuestionStep */
         QuestionStep: {
+            /** Id */
             id: string;
+            /** Prompt */
             prompt: string;
+            /** Options */
             options: components["schemas"]["Option"][];
+            /** Optional */
             optional: boolean;
+            /**
+             * Multiple
+             * @default false
+             */
+            multiple: boolean;
+            /** Source Url */
+            source_url?: string;
         };
         DailyQuestion: {
             /** Format: uuid */
@@ -369,9 +381,16 @@ export interface components {
             /** Format: uuid */
             question_version_id: string;
         };
+        /** ExplorationAnswer */
         ExplorationAnswer: {
+            /** Step Id */
             step_id: string;
+            /** Option Id */
             option_id: string;
+            /** Option Ids */
+            option_ids?: string[] | null;
+            /** Supplementary Text */
+            supplementary_text?: string | null;
         };
         ExplorationState: {
             /** Format: uuid */
@@ -382,6 +401,8 @@ export interface components {
             status: "active" | "completed" | "expired";
             next_step: components["schemas"]["QuestionStep"] | null;
             reading_intent_id: string | null;
+            /** @description 仅返回当前身份该探索的已提交答案，按提交顺序排列。 */
+            answers?: components["schemas"]["ExplorationAnswerRecord"][];
         };
         ReadingPreferences: {
             genre: string | null;
@@ -456,41 +477,90 @@ export interface components {
             verified_topics: string[];
             evidence_urls: string[];
         };
+        /** ConversationCreate */
         ConversationCreate: {
-            /** @enum {string} */
+            /**
+             * Kind
+             * @constant
+             */
             kind: "discussion";
+            /** Topic Id */
             topic_id: string | null;
+            /** Exploration Id */
+            exploration_id?: string | null;
         };
+        /** Conversation */
         Conversation: {
-            /** Format: uuid */
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
             conversation_id: string;
-            /** @enum {string} */
+            /**
+             * Kind
+             * @constant
+             */
             kind: "discussion";
+            /** Topic Id */
             topic_id: string | null;
-            /** @enum {string} */
+            /**
+             * Status
+             * @enum {string}
+             */
             status: "active" | "closed" | "expired";
+            /** Last Message Seq */
             last_message_seq: number;
-            /** Format: date-time */
+            /**
+             * Created At
+             * Format: date-time
+             */
             created_at: string;
+            /**
+             * Provider Mode
+             * @default mock
+             * @enum {string}
+             */
+            provider_mode: "mock" | "deepseek";
         };
+        /** ConversationMessage */
         ConversationMessage: {
-            /** Format: uuid */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
+            /** Seq */
             seq: number;
-            /** @enum {string} */
+            /**
+             * Role
+             * @enum {string}
+             */
             role: "user" | "assistant";
-            /** @enum {string} */
+            /**
+             * Status
+             * @enum {string}
+             */
             status: "pending" | "generating" | "completed" | "failed" | "blocked";
+            /** Content */
             content: string;
-            /** Format: date-time */
+            /**
+             * Created At
+             * Format: date-time
+             */
             created_at: string;
         };
+        /** ConversationMessagePage */
         ConversationMessagePage: {
+            /** Messages */
             messages: components["schemas"]["ConversationMessage"][];
+            /** Next After Seq */
             next_after_seq: number | null;
         };
+        /** ConversationMessageCreate */
         ConversationMessageCreate: {
+            /** Client Message Id */
             client_message_id: string;
+            /** Content */
             content: string;
         };
         HandoffCreate: {
@@ -535,6 +605,21 @@ export interface components {
         Ok: {
             /** @constant */
             ok: true;
+        };
+        /** ExplorationAnswerRecord */
+        ExplorationAnswerRecord: {
+            /** Step Id */
+            step_id: string;
+            /** Option Id */
+            option_id: string;
+            /** Option Ids */
+            option_ids?: string[] | null;
+            /** Supplementary Text */
+            supplementary_text?: string | null;
+            /** Step Prompt */
+            step_prompt?: string;
+            /** Option Label */
+            option_label?: string;
         };
     };
     responses: never;
@@ -583,6 +668,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -685,6 +779,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -777,6 +880,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -862,6 +974,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -963,6 +1084,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1048,6 +1178,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1154,6 +1293,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1241,6 +1389,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1349,6 +1506,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1441,6 +1607,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1549,6 +1724,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1643,6 +1827,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1730,6 +1923,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1836,6 +2038,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -1923,6 +2134,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2027,6 +2247,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -2117,6 +2346,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2225,6 +2463,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -2326,6 +2573,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description 失败时遵循统一错误契约 */
             409: {
                 headers: {
@@ -2413,6 +2669,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2512,6 +2777,15 @@ export interface operations {
             };
             /** @description 失败时遵循统一错误契约 */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description 资源不存在或当前身份无权访问 */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -34,5 +34,5 @@ class ErrorEnvelope(StrictDto):
 
 ERROR_RESPONSES = {
     code: {"model": ErrorEnvelope, "description": "失败时遵循统一错误契约"}
-    for code in (400, 401, 403, 409, 422, 429, 500, 503)
+    for code in (400, 401, 403, 404, 409, 422, 429, 500, 503)
 }

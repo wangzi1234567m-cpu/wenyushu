@@ -153,3 +153,12 @@ recommendation_items_table = sa.Table(
     sa.UniqueConstraint("job_id", "work_id"),
     schema="reading",
 )
+
+sa.Index(
+    "uq_daily_intent_source",
+    intents_table.c.actor_id,
+    intents_table.c.source_type,
+    intents_table.c.source_ref_id,
+    unique=True,
+    postgresql_where=sa.text("source_type = 'daily_question' AND source_ref_id IS NOT NULL"),
+)

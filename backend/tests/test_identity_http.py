@@ -105,7 +105,7 @@ def test_health_and_body_limits(client, foundation):
     assert client.post(PATH, content=b"x" * 65536).status_code == 201
     assert client.post(PATH, content=b"x" * 65537).status_code == 422
     assert client.post(PATH, content=iter([b"x" * 32768, b"x" * 32769])).status_code == 422
-    assert client.post("/api/v1/recommendations").status_code == 404
+    assert client.post("/api/v1/reading-intents").status_code == 404
 
 
 def test_unauthorized_revoke(client):

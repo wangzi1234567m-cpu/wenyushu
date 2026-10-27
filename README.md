@@ -4,6 +4,8 @@
 
 ## P0 本地运行
 
+P1 已按最新要求实现“选择立场→多选理由与补充→持续讨论”；旁栏推荐入口导航到独立预留页，尚不检索书籍。本地启动入口仍为 `python scripts/dev.py up`，默认 Mock 可无密钥运行；配置服务端 DeepSeek 后使用真实讨论。当前验收及数据流见 `docs/acceptance/P1_DISCUSSION.md`；旧版记录保留在 `docs/acceptance/P1.md`。
+
 当前已增加基础工程；实际验收状态见 `docs/acceptance/P0.md`。以下原交付包说明保留作基线背景。
 
 前置：Python 3.13、Docker Desktop（Linux containers，Compose v2）。不需要 DeepSeek Key。
@@ -22,7 +24,7 @@ python scripts/dev.py down
 
 停止保留数据库卷；不要添加 `down -v`。数据库只在 Compose 内网开放。独立 migrate 服务成功后才启动 API/Worker。
 
-P0 仅开放 `/api/v1/auth/anonymous-session`（POST/DELETE）和 `/api/v1/health/live`、`/api/v1/health/ready`。`/openapi.json` 为运行时接口描述；P1—P5 业务接口尚未注册。
+P0 基础接口为 `/api/v1/auth/anonymous-session`（POST/DELETE）和 `/api/v1/health/live`、`/api/v1/health/ready`。当前 P1 分支另外注册题目、探索、兼容的 Mock 推荐及 conversation 端点；`/openapi.json` 反映实际注册的接口。Handoff、真实找书等后续接口尚未注册。
 
 ### 开发与检查
 
@@ -62,6 +64,12 @@ npm run start
 ```
 
 API 内部地址默认 `http://127.0.0.1:8000`；Compose 构建为 `http://api:8000`。前端只请求同源 `/api/v1`，不接触服务器密钥。
+
+### 服务端模型配置
+
+根目录 `.env` 是本机私有配置，已被 Git 忽略；可提交的字段说明见 `.env.example`。本机原生后端必须从项目根目录启动，才能读取该文件。配置真实讨论时使用 `PROVIDER=deepseek`，仅在 `DEEPSEEK_API_KEY=` 后填写密钥，不添加 `NEXT_PUBLIC_` 前缀，不把文件放进 `web/`。填好后需重启后端才会生效。模型、超时、上下文预算和回复长度均可配置；缺失或错误的密钥会返回可恢复错误，不自动伪装成 Mock 成功。
+
+Docker Compose（2.24 或更新版本）也会把根目录 `.env` 注入后端容器；容器数据库连接、CSRF 密钥和访问来源仍使用 Compose 自己的配置，避免把原生数据库地址带入容器。修改 `.env` 后执行 `python scripts/dev.py up` 重建或更新服务。前端容器不读取此文件。
 
 服务启动后，在 web/ 执行 `npx playwright install chromium` 和 `npm run test:e2e`。测试真实首页、Secure/HttpOnly Cookie、两个浏览器身份隔离、刷新、失败重试与 390/1440px 布局。远程访问必须使用 HTTPS；不通过关闭 Secure 适配不安全来源。
 

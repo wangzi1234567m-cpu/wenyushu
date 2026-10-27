@@ -76,6 +76,9 @@ CREATE TABLE content.exploration_answers (
     exploration_id uuid NOT NULL REFERENCES content.explorations(id) ON DELETE CASCADE,
     step_id varchar(96) NOT NULL,
     option_id varchar(96) NOT NULL,
+    supplementary_text varchar(300),
+    option_ids jsonb,
+    CONSTRAINT ck_answer_option_ids CHECK (option_ids IS NULL OR (jsonb_typeof(option_ids) = 'array' AND jsonb_array_length(option_ids) BETWEEN 1 AND 6)),
     submitted_at timestamptz NOT NULL DEFAULT now(),
     UNIQUE(exploration_id,step_id)
 );
@@ -137,6 +140,7 @@ CREATE TABLE reading.intents (
     created_at timestamptz NOT NULL DEFAULT now(),
     expires_at timestamptz
 );
+CREATE UNIQUE INDEX uq_daily_intent_source ON reading.intents(actor_id,source_type,source_ref_id) WHERE source_type = 'daily_question' AND source_ref_id IS NOT NULL;
 CREATE INDEX ix_intents_actor ON reading.intents(actor_id,created_at DESC);
 CREATE TABLE reading.recommendation_jobs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -245,4 +249,16 @@ CREATE TABLE safety.reports (
     reviewed_at timestamptz
 );
 CREATE INDEX ix_reports_status ON safety.reports(status,created_at DESC);
+-- ADR-013: discussion owns the initial exploration snapshot; UUID references use ports.
+CREATE SCHEMA IF NOT EXISTS discussion;
+CREATE TABLE discussion.contexts (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id uuid NOT NULL,
+    conversation_id uuid NOT NULL UNIQUE,
+    exploration_id uuid,
+    context_json jsonb NOT NULL CHECK (jsonb_typeof(context_json) = 'object'),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(actor_id,exploration_id)
+);
+
 COMMIT;

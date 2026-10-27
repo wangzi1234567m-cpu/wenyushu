@@ -6,55 +6,17 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from alembic import command
 from alembic.autogenerate import compare_metadata
-from alembic.config import Config
 from alembic.migration import MigrationContext
 from app.infrastructure.db.metadata import metadata
 from app.infrastructure.settings.config import Settings
 from app.main import create_app
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, inspect, text
-from sqlalchemy.engine import make_url
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
 
 pytestmark = pytest.mark.postgres
 ROOT = Path(__file__).parents[2]
-
-
-@pytest.fixture(scope="module")
-def engine():
-    url = os.environ.get("TEST_DATABASE_URL")
-    if not url:
-        pytest.skip("TEST_DATABASE_URL not configured; PostgreSQL acceptance not passed")
-    assert make_url(url).database.endswith("_test"), "Refusing non-test database"
-    old = os.environ.get("DATABASE_URL")
-    os.environ["DATABASE_URL"] = url
-    config = Config(str(ROOT / "backend/alembic.ini"))
-    db = create_engine(url)
-    # Existing business schemas must not be overwritten.
-    with db.connect() as conn:
-        schemas = inspect(conn).get_schema_names()
-        assert not set(schemas) & {
-            "identity",
-            "content",
-            "conversation",
-            "reading",
-            "catalog",
-            "handoff",
-            "safety",
-        }, "Tests require an empty disposable database"
-    command.upgrade(config, "head")
-    command.upgrade(config, "head")
-    yield db
-    command.downgrade(config, "base")
-    command.upgrade(config, "head")
-    command.downgrade(config, "base")
-    db.dispose()
-    if old is None:
-        os.environ.pop("DATABASE_URL", None)
-    else:
-        os.environ["DATABASE_URL"] = old
 
 
 def test_metadata_matches_migration(engine):
@@ -63,7 +25,7 @@ def test_metadata_matches_migration(engine):
             MigrationContext.configure(conn, opts={"include_schemas": True}), metadata
         )
         assert changes == []
-        assert len(metadata.tables) == 18
+        assert len(metadata.tables) == 19
         for table in metadata.sorted_tables:
             assert inspect(conn).has_table(table.name, schema=table.schema)
 
@@ -78,6 +40,14 @@ def test_frozen_migration_matches_reference_sql():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     baseline = (ROOT / "db/schema.sql").read_text(encoding="utf-8")
+    # Design reference now includes ADR-012; frozen 0001 must remain unchanged.
+    baseline = re.sub(
+        r"-- ADR-013:.*?CREATE TABLE discussion.contexts \(.*?\);", "", baseline, flags=re.S
+    )
+    baseline = baseline.replace("    option_ids jsonb,\n", "")
+    baseline = re.sub(r"    CONSTRAINT ck_answer_option_ids[^\n]+\n", "", baseline)
+    baseline = baseline.replace("    supplementary_text varchar(300),\n", "")
+    baseline = re.sub(r"CREATE UNIQUE INDEX uq_daily_intent_source[^;]+;", "", baseline)
     baseline = re.sub(r"--[^\n]*", "", baseline)
     baseline = baseline.replace("BEGIN;", "").replace("COMMIT;", "")
     assert [x.stmt for x in parse_sql(baseline)] == [
@@ -275,6 +245,8 @@ def test_database_constraints(engine):
 
 def test_real_identity_roundtrip(engine):
     settings = Settings(
+        _env_file=None,
+        provider="mock",
         database_url=os.environ["TEST_DATABASE_URL"],
         csrf_secret="isolated-test-secret-not-for-production",
         environment="test",

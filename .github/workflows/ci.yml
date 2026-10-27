@@ -1,4 +1,4 @@
-name: P0 checks
+name: Project checks
 on:
   push:
     branches: [main, 'feat/**', 'fix/**']

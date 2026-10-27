@@ -3,12 +3,14 @@ x-backend: &backend
   build:
     context: ..
     dockerfile: backend/Dockerfile
+  env_file:
+    - path: ../.env
+      required: false
   environment: &environment
     DATABASE_URL: postgresql+psycopg://wqs:${POSTGRES_PASSWORD:?run scripts/dev.py up}@postgres:5432/wenyushu
     CSRF_SECRET: ${CSRF_SECRET:?run scripts/dev.py up}
     ALLOWED_ORIGINS: '["http://localhost:3000"]'
     ENVIRONMENT: development
-    PROVIDER: mock
 
 services:
   postgres:
@@ -26,7 +28,7 @@ services:
       retries: 20
   migrate:
     <<: *backend
-    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    command: ["sh", "-c", "alembic -c backend/alembic.ini upgrade head && python -m app.bootstrap.seed_daily"]
     depends_on:
       postgres:
         condition: service_healthy
