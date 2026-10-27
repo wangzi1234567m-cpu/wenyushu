@@ -31,7 +31,7 @@ test("daily exploration, restore, explicit recommendation and revision", async (
   await page.getByRole("button", { name: "修改第 2 步", exact: true }).click();
   await page.route("**/explorations/*/answers", (route) => route.abort());
   await page.getByRole("button", { name: "恢复前面的答案", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("region", { name: "每日一问", exact: true }).getByRole("alert")).toBeVisible();
   await page.unroute("**/explorations/*/answers");
   await page.reload();
   await page.getByRole("button", { name: "恢复前面的答案", exact: true }).click();
@@ -50,7 +50,7 @@ test("failed answer can retry without losing selection or supplementary text", a
   await page.getByRole("textbox").fill("想保留的补充");
   await page.route("**/explorations/*/answers", (route) => route.abort());
   await page.getByRole("button", { name: "继续", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("region", { name: "每日一问", exact: true }).getByRole("alert")).toBeVisible();
   await expect(page.getByRole("textbox")).toHaveValue("想保留的补充");
   await page.unroute("**/explorations/*/answers");
   await page.getByRole("button", { name: "继续", exact: true }).click();
