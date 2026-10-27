@@ -1,0 +1,58 @@
+name: wenyushu
+x-backend: &backend
+  build:
+    context: ..
+    dockerfile: backend/Dockerfile
+  environment: &environment
+    DATABASE_URL: postgresql+psycopg://wqs:${POSTGRES_PASSWORD:?run scripts/dev.py up}@postgres:5432/wenyushu
+    CSRF_SECRET: ${CSRF_SECRET:?run scripts/dev.py up}
+    ALLOWED_ORIGINS: '["http://localhost:3000"]'
+    ENVIRONMENT: development
+    PROVIDER: mock
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: wqs
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/dev.py up}
+      POSTGRES_DB: wenyushu
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wqs -d wenyushu"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    <<: *backend
+    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    <<: *backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready',timeout=4)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  worker:
+    <<: *backend
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  web:
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  pgdata:

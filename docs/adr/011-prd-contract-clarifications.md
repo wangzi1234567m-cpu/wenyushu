@@ -16,6 +16,8 @@ PRD §4.7 要求返回上一步并修改答案。SAD §7.2 规定 completed/expi
 
 ## 2. 探索表唯一 Owner（P0 前确认解释）
 
+本项已于 2026-10-24 由用户明确确认；仅本项获批准，其他提议仍待决。
+
 SAD §3 将探索流程交给 exploration，§6 与 DDL 将探索表放在 content schema。schema 位置不必等于代码 Owner，故这里是归属歧义，不直接判定 DDL 冲突。
 
 建议明确：`content.explorations` 和 `content.exploration_answers` 的唯一代码 Owner 为 exploration；题目及版本归 content，通过端口读取。保留表名与 schema，不迁表。
