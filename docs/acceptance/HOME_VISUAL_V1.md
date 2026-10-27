@@ -41,7 +41,7 @@ P1 PR #3 仍未合并，因此本视觉PR以 `feat/p1-daily-exploration` 为基�
 | 1440px/390px响应式 | PASS | 两种CSS视口测试、无水平溢出；手机纵排，主标题/按钮完整可见 |
 | 图片加载与分离 | PASS | 独立爱情图自然尺寸非0，水墨素材200；标题和按钮没有嵌入图片 |
 | 构建与类型 | PASS | lint、typecheck、生产build均exit 0 |
-| 浏览器检查 | PASS | 16 passed (5.4s)，桌面与手机各8项 |
+| 浏览器检查 | PASS | 16 passed (4.5s)，桌面与手机各8项 |
 | 后端/数据库/契约不变 | PASS | 相对P1基线的对应目录Git diff为空 |
 | 截图交付 | PASS | 下列1440px桌面与390px手机实际运行截图 |
 | 用户人工视觉验收 | 待验收 | 保持功能分支和草稿PR，不自动合并 |
@@ -61,7 +61,7 @@ E2E_API_TARGET=http://127.0.0.1:8100
 PLAYWRIGHT_BROWSERS_PATH=<本机已安装浏览器目录>
 cd web
 npm run test:e2e
-16 passed (5.4s)
+16 passed (4.5s)
 
 GET / → 200
 GET /daily-question → 200
@@ -76,7 +76,7 @@ git diff --name-only bfc8965 -- backend contracts db infra .env.example
 
 测试覆盖首页静态渲染、图片、响应式、各模式入口、明确占位、旧链接，以及已有匿名Cookie/身份隔离、bootstrap失败恢复、探索/多选/聊天/刷新/改答/失败重试。测试未调用真实模型。首次16项中15项通过，另1项因页面关闭时测试转发响应被释放而失败；夹具增加结束前等待请求收尾后重跑16项全通过，没有使用无条件重试掩盖失败。
 
-CI使用原仓库流程，容器默认Mock。最新结果见本PR检查；不以P1旧提交CI充当本次结果。
+CI使用原仓库流程，容器默认Mock。首次运行40523912000后端与前端检查通过，容器浏览器14项通过、2项图片检查失败：原web/Dockerfile未复制public，容器爱情图返回404。补齐runner的public复制，并对两张素材增加直接HTTP200检查后，最新结果见本PR检查；不以P1旧提交CI充当本次结果。本机最后截图等待匿名访问就绪后拍摄，避免交付瞬间加载状态。
 
 ## 运行截图
 
@@ -96,6 +96,7 @@ CI使用原仓库流程，容器默认Mock。最新结果见本PR检查；不以
 - `web/src/app/daily-question/page.tsx`：现有探索的独立容器；`discover/page.tsx`、`discussion/page.tsx`：明确准备页。
 - `web/src/app/recommendations/page.tsx`：共享导航、返回讨论链接。
 - `web/public/images/love-at-the-window.webp`、`quiet-landscape.webp`：无文字独立素材，约200KiB和31KiB。
+- `web/Dockerfile`：在前端runner中复制public，确保容器打包独立图片。
 - `web/tests/home-visual.spec.ts`、`fixtures.ts`：视觉/导航检查及本机独立Mock目标；`foundation.spec.ts`、`daily.spec.ts`：更新标题与路由回归。
 - 本验收、素材提示词记录、两张运行截图。
 
@@ -105,4 +106,4 @@ CI使用原仓库流程，容器默认Mock。最新结果见本PR检查；不以
 
 没有新增依赖、接口或数据库迁移。完整滑动题流留后续；三种找书及独立思辨准备页不是功能交付。宋体的具体字形随操作系统字体略有差异。生成图片保持参考构图和色调，但不是原图逐像素复刻。
 
-回滚：在本视觉分支revert首页实现提交，重新构建并重启前端即可；现有后端和数据库无需回滚。不要删除数据卷或清除浏览器匿名凭证/会话记录。验收通过前不合并main、不打阶段Tag、不部署生产。
+回滚：revert本视觉PR的全部提交（包含静态资源打包修正），重新构建并重启前端即可；现有后端和数据库无需回滚。不要删除数据卷或清除浏览器匿名凭证/会话记录。验收通过前不合并main、不打阶段Tag、不部署生产。

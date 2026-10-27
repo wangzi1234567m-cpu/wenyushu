@@ -13,6 +13,10 @@ test("editorial homepage, real images, semantic links and responsive layout", as
   await expect(page.getByRole("link", { name: "进入每日一问", exact: true })).toHaveAttribute("href", "/daily-question");
   await expect(page.getByRole("link", { name: "探索书籍", exact: true })).toHaveAttribute("href", "/discover");
   await expect(page.getByRole("heading", { name: "有些问题，值得慢慢聊。", exact: true })).toBeVisible();
+  for (const asset of ["love-at-the-window.webp", "quiet-landscape.webp"]) {
+    const response = await page.request.get(`/images/${asset}`);
+    expect(response.status(), `Packaged public asset: ${asset}`).toBe(200);
+  }
   const photo = page.getByRole("img", { name: "雨滴映着城市暮色，两只手在温暖光线中轻轻靠近" });
   await expect(photo).toBeVisible();
   await expect.poll(() => photo.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
@@ -22,8 +26,7 @@ test("editorial homepage, real images, semantic links and responsive layout", as
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   const background = await page.locator(".thinking-entry").evaluate((element) => getComputedStyle(element).backgroundImage);
   expect(background).toContain("quiet-landscape.webp");
-  const landscape = await page.request.get("/images/quiet-landscape.webp");
-  expect(landscape.ok()).toBe(true);
+  await expect(page.getByRole("status").filter({ hasText: "匿名访问已就绪" })).toHaveText("匿名访问已就绪");
   await page.screenshot({ path: `test-results/home-v1-${test.info().project.name}.png`, fullPage: true, scale: "css" });
   await page.getByRole("link", { name: "进入每日一问：爱，是否应该拥有选择的自由？", exact: true }).click();
   await expect(page).toHaveURL(/\/daily-question$/);
