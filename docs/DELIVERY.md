@@ -133,6 +133,8 @@ git push origin mvp-p1
 
 ## F. 验收记录模板（每阶段复制）
 
+本次有限范围补充“思辨助手体验与观点收藏”单独验收，不视为后续推荐/检索阶段完成。范围与测试证据见 [验收记录](acceptance/DISCUSSION_VIEWPOINTS.md)、[真实模型试答](acceptance/DISCUSSION_QUALITY.md) 和 [ADR-014](adr/014-discussion-viewpoints.md)。需检查消息原文/AI提炼的来源区分、刷新持久化、返回原消息、跨身份隔离、提炼幂等及失败恢复、删除原会话的隐私清理；仍须CI和人工产品验收后另行授权合并。
+
 ```markdown
 # Pn 验收记录
 - PR：

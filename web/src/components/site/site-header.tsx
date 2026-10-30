@@ -1,11 +1,12 @@
 import Link from "next/link";
 
-type Section = "home" | "daily" | "discover" | "discussion";
+type Section = "home" | "daily" | "discover" | "discussion" | "saved";
 const navigation: { id: Section; label: string; href: string }[] = [
   { id: "home", label: "首页", href: "/" },
   { id: "daily", label: "每日一问", href: "/daily-question" },
   { id: "discover", label: "发现书籍", href: "/discover" },
   { id: "discussion", label: "思辨助手", href: "/discussion" },
+  { id: "saved", label: "我的收藏", href: "/saved-viewpoints" },
 ];
 
 export function SiteHeader({ active }: { active: Section }) {

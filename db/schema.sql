@@ -261,4 +261,47 @@ CREATE TABLE discussion.contexts (
     UNIQUE(actor_id,exploration_id)
 );
 
+-- ADR-014 BEGIN
+
+CREATE TABLE discussion.viewpoint_extractions (
+	id UUID NOT NULL,
+	actor_id UUID NOT NULL,
+	conversation_id UUID NOT NULL,
+	up_to_seq INTEGER NOT NULL,
+	status VARCHAR(16) NOT NULL,
+	lease_id UUID,
+	attempts INTEGER NOT NULL,
+	items JSONB NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (id),
+	CHECK (up_to_seq >= 1),
+	CHECK (attempts BETWEEN 1 AND 3),
+	CHECK (status IN ('processing','succeeded','failed')),
+	CHECK (jsonb_typeof(items) = 'array' AND jsonb_array_length(items) <= 3),
+	UNIQUE (actor_id, conversation_id, up_to_seq)
+)
+
+;
+
+CREATE TABLE discussion.saved_viewpoints (
+	id UUID NOT NULL,
+	actor_id UUID NOT NULL,
+	conversation_id UUID NOT NULL,
+	message_id UUID,
+	source_message_ids JSONB NOT NULL,
+	source_type VARCHAR(24) NOT NULL,
+	content TEXT NOT NULL,
+	topic_title VARCHAR(300) NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+	PRIMARY KEY (id),
+	CHECK (source_type IN ('user_quote','ai_viewpoint','ai_summary')),
+	CHECK (char_length(content) BETWEEN 1 AND 16000),
+	CHECK (jsonb_typeof(source_message_ids) = 'array' AND jsonb_array_length(source_message_ids) BETWEEN 1 AND 4)
+)
+
+;
+CREATE INDEX ix_saved_viewpoints_actor ON discussion.saved_viewpoints (actor_id, created_at, id);
+-- ADR-014 END
+
 COMMIT;

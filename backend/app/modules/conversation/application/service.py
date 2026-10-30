@@ -23,6 +23,9 @@ class ConversationRuntime:
     def create(self, actor_id, conversation_id, topic_id):
         return self.repo.create(actor_id, conversation_id, topic_id)
 
+    def snapshot(self, actor_id, conversation_id, up_to_seq=None, message_id=None):
+        return self.repo.snapshot(actor_id, conversation_id, up_to_seq, message_id)
+
     def get(self, actor_id, conversation_id):
         return self.repo.get(actor_id, conversation_id)
 

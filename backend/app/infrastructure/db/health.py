@@ -1,7 +1,7 @@
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-EXPECTED_REVISION = "0003_daily_discussion"
+EXPECTED_REVISION = "0004_saved_viewpoints"
 
 
 def database_ready(engine: Engine) -> bool:
