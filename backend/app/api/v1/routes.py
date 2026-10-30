@@ -4,6 +4,7 @@ from app.api.dependencies import health_service
 from app.api.dto import ERROR_RESPONSES, HealthStatus
 from app.api.v1.conversations import router as conversation_router
 from app.api.v1.daily import router as daily_router
+from app.api.v1.viewpoints import router as viewpoint_router
 from app.modules.identity.api.routes import router as identity_router
 from app.shared.health import HealthService
 from fastapi import APIRouter, Depends
@@ -12,6 +13,7 @@ router = APIRouter(prefix="/api/v1")
 router.include_router(identity_router)
 router.include_router(daily_router)
 router.include_router(conversation_router)
+router.include_router(viewpoint_router)
 
 
 @router.get(

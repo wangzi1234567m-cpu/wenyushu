@@ -80,7 +80,7 @@ Docker Compose（2.24 或更新版本）也会把根目录 `.env` 注入后端�
 ## 文件
 
 - `docs/SAD.md`：完整软件架构设计
-- `contracts/openapi.yaml`：OpenAPI 3.1 外部接口基线（21项 operation）
+- `contracts/openapi.yaml`：OpenAPI 3.1 外部接口基线（26项 operation）
 - `db/schema.sql`：PostgreSQL 关系模式参考（Alembic 是正式迁移唯一入口）
 - `docs/DELIVERY.md`：P0–P5 的验收门槛、Git/PR/Tag 规范
 - `docs/CODEX_START.md`：P0 开发任务提示词及后续任务模板

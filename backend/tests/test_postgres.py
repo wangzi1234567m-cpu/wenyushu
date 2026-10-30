@@ -25,7 +25,7 @@ def test_metadata_matches_migration(engine):
             MigrationContext.configure(conn, opts={"include_schemas": True}), metadata
         )
         assert changes == []
-        assert len(metadata.tables) == 19
+        assert len(metadata.tables) == 21
         for table in metadata.sorted_tables:
             assert inspect(conn).has_table(table.name, schema=table.schema)
 
@@ -40,6 +40,7 @@ def test_frozen_migration_matches_reference_sql():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     baseline = (ROOT / "db/schema.sql").read_text(encoding="utf-8")
+    baseline = re.sub(r"-- ADR-014 BEGIN.*?-- ADR-014 END", "", baseline, flags=re.S)
     # Design reference now includes ADR-012; frozen 0001 must remain unchanged.
     baseline = re.sub(
         r"-- ADR-013:.*?CREATE TABLE discussion.contexts \(.*?\);", "", baseline, flags=re.S
