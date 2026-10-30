@@ -54,7 +54,7 @@ npm --prefix web run test:e2e
 | OpenAPI | PASS | `26 operations; 36 schemas; 283 resolved references`；运行时路由/DTO一致性测试通过 |
 | 后端与实际数据库 | PASS | `71 passed, 2 warnings in 16.67s`；空库迁移、重复升级、ORM等价、约束拒绝、越权、伪造来源、CSRF、Origin、并发、重复保存、清理与失败重试 |
 | 前端lint/typecheck/build | PASS | ESLint、tsc退出0；Next构建成功，新增收藏/原讨论路由正常 |
-| 浏览器桌面/手机 | PASS | 24 passed (9.2s)；1440px桌面与390px手机，收藏/取消/刷新/来源跳转/错误恢复/身份隔离；旧测试硬编码题目文案已修复 |
+| 浏览器桌面/手机 | PASS | 24 passed (10.8s)；1440px桌面与390px手机，收藏/取消/刷新/来源跳转/错误恢复/身份隔离；旧测试硬编码题目文案已修复 |
 | 真实模型A/B/C | PASS（有限样本） | 187/206/201字符，均0问号，有实际观点输出；原文及局限见[质量记录](DISCUSSION_QUALITY.md) |
 | 真实提炼和收藏链路 | PASS | 真实回复261字符、提炼2条候选、保存2条后刷新恢复，定位原消息；清理测试会话HTTP200 |
 | 推荐与分层回归 | PASS | 未点击不发推荐请求；原入口往返保留历史；既有架构依赖测试通过，无Discussion→Recommendation依赖 |
@@ -63,6 +63,8 @@ npm --prefix web run test:e2e
 两条后端警告为现有Starlette/httpx测试适配弃用提示及Windows pytest缓存写权限，不影响断言。真实模型试答不参与自动化CI；自动化测试全部注入Mock。首次浏览器复跑22通过、2误报的原因和修正已如实保留。Windows Docker引擎此前不可用，本次本机不冒充通过Compose；CI另行验证Linux Compose。
 
 已检查[桌面截图](../screenshots/discussion-viewpoints/desktop.png)和[手机截图](../screenshots/discussion-viewpoints/mobile.png)：使用测试夹具的Mock内容，无私人讨论或密钥；窄屏导航、长观点文字和操作按钮均无横向溢出。
+
+首次Linux Compose CI为23通过/1失败，定位为收藏后立刻跨页时，列表先于保存完成而读取。前端API模块现在只在内存记录未完成写请求，列表等其结束再查询；消息按钮显示保存中。保留立即跨页用例并主动注入750ms保存延迟，验证实际时序，未用测试重试掩盖问题。后端/前端CI首次均通过；修复后的完整CI结果见PR当前提交检查。
 
 已检查[桌面截图](../screenshots/discussion-viewpoints/desktop.png)和[手机截图](../screenshots/discussion-viewpoints/mobile.png)：使用测试夹具的Mock内容，无私人讨论或密钥；窄屏导航、长观点文字和操作按钮均无横向溢出。
 

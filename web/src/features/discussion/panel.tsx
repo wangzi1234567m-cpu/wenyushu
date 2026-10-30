@@ -103,7 +103,7 @@ export function DiscussionPanel({ explorationId, conversationId, sourceMessageId
           {message.status === "failed" && <small>回复中断</small>}
           {conversation && message.status === "completed" && !message.id.startsWith("local-") && (() => {
             const existing = collection.saved.find((item) => item.message_id === message.id && item.source_type !== "ai_summary");
-            return <button className="message-save" aria-label={`${existing ? "取消收藏" : "收藏"}${message.role === "user" ? "用户原话" : "AI 消息原文"}`} aria-pressed={!!existing} disabled={collection.working.includes(message.id)} onClick={() => void collection.toggle(message.id, { conversation_id: conversation.conversation_id, message_id: message.id }, existing)}>{existing ? "已收藏 · 取消收藏" : "收藏观点"}</button>;
+            return <button className="message-save" aria-label={`${existing ? "取消收藏" : "收藏"}${message.role === "user" ? "用户原话" : "AI 消息原文"}`} aria-pressed={!!existing} disabled={collection.working.includes(message.id)} onClick={() => void collection.toggle(message.id, { conversation_id: conversation.conversation_id, message_id: message.id }, existing)}>{collection.working.includes(message.id) ? "正在保存…" : existing ? "已收藏 · 取消收藏" : "收藏观点"}</button>;
           })()}
         </article>)}<div ref={end} />
       </div>

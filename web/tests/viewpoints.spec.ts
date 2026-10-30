@@ -22,6 +22,10 @@ test("original viewpoints persist, distinguish provenance and return to exact co
   await chat.getByRole("textbox").fill(quote);
   await chat.getByRole("button", { name: "发送", exact: true }).click();
   const user = chat.locator(".message.user").filter({ hasText: quote });
+  await page.route("**/api/v1/saved-viewpoints", async (route) => {
+    if (route.request().method() === "POST") await new Promise((resolve) => setTimeout(resolve, 750));
+    await route.fallback();
+  });
   await user.getByRole("button", { name: "收藏用户原话", exact: true }).click();
   await page.getByRole("navigation", { name: "主导航" }).getByRole("link", { name: "我的收藏", exact: true }).click();
   await expect(page.locator(".saved-viewpoint")).toHaveCount(2);
