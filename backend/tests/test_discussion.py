@@ -305,6 +305,41 @@ def test_summary_preserves_changes_and_failure_is_recoverable(
     runtime.repo.finish(turn, "done", "completed", "mock")
 
 
+def test_daily_debate_context_preserves_questions_and_replay_without_extra_calls(
+    chat_client, discussion_app, monkeypatch
+):
+    from app.modules.discussion.application.policy import DAILY_DEBATE_PROMPT
+
+    state = source(chat_client, discussion_app)
+    key = create(chat_client, state["exploration_id"])
+    runtime = discussion_app.state.services.runtime
+    captured = []
+    original = runtime.llm.stream_chat
+
+    async def record(messages, config):
+        captured.append(messages)
+        async for chunk in original(messages, config):
+            yield chunk
+
+    monkeypatch.setattr(runtime.llm, "stream_chat", record)
+    result = events(send(chat_client, key, "请用一个具体情境说明这个立场"))
+    assert result[-1][0] == "message_completed"
+    question = "那你为什么认为影响别人和控制别人不同？请先回答我的反问。"
+    assert events(send(chat_client, key, question, "counterquestion"))[-1][0] == "message_completed"
+    assert len(captured) == 2
+    assert DAILY_DEBATE_PROMPT in captured[-1][0].content
+    assert captured[-1][-1].role == "user" and captured[-1][-1].content == question
+    assert any("我在意自由选择" in m.content for m in captured[-1])
+    assert any(m.content == "请用一个具体情境说明这个立场" for m in captured[-1])
+    # Refresh/replay and original-question reads cannot silently ask the model again.
+    assert chat_client.get(f"/api/v1/conversations/{key}/messages").status_code == 200
+    assert events(send(chat_client, key, question, "counterquestion"))[-1][0] == "message_completed"
+    assert len(captured) == 2
+    plain = create(chat_client)
+    assert events(send(chat_client, plain, question))[-1][0] == "message_completed"
+    assert DAILY_DEBATE_PROMPT not in captured[-1][0].content
+
+
 def test_multiple_boundaries_and_db_constraints(chat_client, discussion_app, engine):
     from datetime import UTC, datetime
 

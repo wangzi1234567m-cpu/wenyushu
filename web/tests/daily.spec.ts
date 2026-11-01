@@ -92,3 +92,33 @@ test("stream failure is visible and explicit retry keeps the same client id", as
   await expect(discussion.locator(".message.assistant")).toContainText("影响与控制的区别");
   expect(retriedId).toBe(failedId);
 });
+
+test("case and counterquestion drafts remain editable and require explicit send", async ({ page }) => {
+  let generations = 0;
+  page.on("request", (request) => {
+    if (/\/conversations\/[^/]+\/messages$/.test(request.url()) && request.method() === "POST") generations++;
+  });
+  await complete(page);
+  const chat = page.getByRole("region", { name: "持续讨论", exact: true });
+  await expect(chat.getByRole("button", { name: "收藏AI 消息原文", exact: true })).toBeVisible();
+  await expect(chat.getByRole("button", { name: "停止回复", exact: true })).toHaveCount(0);
+  const before = generations;
+  const input = chat.getByRole("textbox");
+  await chat.getByRole("button", { name: "用案例继续", exact: true }).click();
+  await expect(input).toHaveValue(/贴近现实/);
+  expect(generations).toBe(before);
+  await expect(chat.getByRole("button", { name: "我想反问", exact: true })).toBeDisabled();
+  await input.fill("");
+  await chat.getByRole("button", { name: "我想反问", exact: true }).click();
+  await expect(input).toHaveValue("我想反问你：");
+  expect(generations).toBe(before);
+  const question = "我想反问你：如果对方仍可拒绝，你为什么还认为这是控制？";
+  await input.fill(question);
+  await chat.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(chat.getByRole("button", { name: "停止回复", exact: true })).toHaveCount(0);
+  await expect(chat.locator(".message.user").filter({ hasText: question }).getByRole("button", { name: "收藏用户原话", exact: true })).toBeVisible();
+  expect(generations).toBe(before + 1);
+  await page.reload();
+  await expect(chat.getByText(question, { exact: true })).toBeVisible();
+  expect(generations).toBe(before + 1);
+});
