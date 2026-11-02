@@ -1,5 +1,7 @@
 # Daily Question AI Behavior Policy
 
+2026-11-02更新：以下保留2026-11-01行为基线。当前每日一问运行时采用用户随后提供的完整[System Prompt V1.0](../../backend/app/modules/discussion/application/prompts/daily_question_v1.md)，不将本文件另行拼接进system消息。加载与能力边界见[ADR-016](../adr/016-daily-system-prompt-v1.md)。
+
 用户确认基线：2026-11-01。适用于每日一问持续讨论；本文件为行为要求，不新增API或数据库字段。
 
 ## 一、角色定位
