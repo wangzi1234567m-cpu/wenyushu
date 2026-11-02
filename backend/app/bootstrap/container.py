@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app.bootstrap.mock_viewpoints import MockViewpointLLM
 from app.infrastructure.db.health import database_ready
 from app.infrastructure.settings.config import Settings
 from app.integrations.llm.deepseek import DeepSeekLLM
@@ -13,7 +14,9 @@ from app.modules.content.infrastructure.reader import SqlContentReader
 from app.modules.conversation.application.service import ConversationRuntime
 from app.modules.conversation.infrastructure.repository import SqlConversationRepository
 from app.modules.discussion.application.service import DiscussionPolicy, DiscussionService
+from app.modules.discussion.application.viewpoints import ViewpointService
 from app.modules.discussion.infrastructure.repository import SqlDiscussionContexts
+from app.modules.discussion.infrastructure.viewpoints import SqlViewpoints
 from app.modules.exploration.application.service import ExplorationService
 from app.modules.exploration.infrastructure.repository import SqlExplorationRepository
 from app.modules.identity.application.ports import AuthorizationPort
@@ -43,6 +46,7 @@ class Services:
     discussion: DiscussionService | None = None
     runtime: ConversationRuntime | None = None
     provider_mode: str = "mock"
+    viewpoints: ViewpointService | None = None
 
 
 def build_services(settings: Settings):
@@ -75,7 +79,7 @@ def build_services(settings: Settings):
                 "unresolved": [],
             },
             chunks=(
-                "你提到了选择的自由，也在意感情能否持续。如果这种能力只创造一次相遇的机会，而对方仍然可以离开，你的判断会改变吗？",
+                "影响与控制的区别，在于对方还能不能拒绝。争取一次相处的机会，不等于替对方决定感情；即使能保证被爱，也未必能得到被自由选择的意义。这是结果和关系成立方式之间的区别。",
             ),
         ),
         MockSearch(),
@@ -104,7 +108,19 @@ def build_services(settings: Settings):
         settings.chat_global_turn_limit,
     )
     services.conversations = services.runtime
+    services.viewpoints = ViewpointService(
+        SqlViewpoints(factory),
+        services.runtime,
+        contexts,
+        BasicTextSafety(),
+        services.llm if settings.provider == "deepseek" else MockViewpointLLM(),
+        GenerationConfig(
+            model=settings.deepseek_model if settings.provider == "deepseek" else "mock",
+            timeout_seconds=min(settings.chat_timeout_seconds, 30),
+            max_output_tokens=1024,
+        ),
+    )
     services.discussion = DiscussionService(
-        services.runtime, contexts, services.exploration, services.content
+        services.runtime, contexts, services.exploration, services.content, services.viewpoints
     )
     return services, engine

@@ -43,7 +43,7 @@ class SqlConversationRepository:
                     id=conversation_id,
                     actor_id=actor_id,
                     topic_id=topic_id,
-                    policy_version="discussion-v1",
+                    policy_version="discussion-v2",
                     expires_at=datetime.now(UTC) + timedelta(days=7),
                 )
                 .on_conflict_do_nothing()
@@ -53,6 +53,60 @@ class SqlConversationRepository:
     def get(self, actor_id, conversation_id):
         with self.factory.begin() as s:
             return self._owned(s, actor_id, conversation_id, True)
+
+    def snapshot(self, actor_id, conversation_id, up_to_seq=None, message_id=None):
+        with self.factory() as s:
+            session = self._owned(s, actor_id, conversation_id)
+            if message_id:
+                row = (
+                    s.execute(
+                        select(messages).where(
+                            messages.c.session_id == conversation_id,
+                            messages.c.id == message_id,
+                            messages.c.status == "completed",
+                        )
+                    )
+                    .mappings()
+                    .first()
+                )
+                if not row:
+                    raise ApplicationError("NOT_FOUND", "消息不存在或尚未完成")
+                return {
+                    "messages": [self.public_message(row)],
+                    "up_to_seq": row["seq"],
+                    "status": session["status"],
+                }
+            last = (
+                s.scalar(
+                    select(func.max(messages.c.seq)).where(
+                        messages.c.session_id == conversation_id,
+                        messages.c.role == "assistant",
+                        messages.c.status == "completed",
+                    )
+                )
+                or 0
+            )
+            end = last if up_to_seq is None else up_to_seq
+            if end < 1 or end > last or end % 2:
+                raise ApplicationError("INVALID_INPUT", "请选择已完成的一轮讨论")
+            # Fixed recent scope; do not feed failed replies or incomplete turns to extraction.
+            rows = list(
+                s.execute(
+                    select(messages)
+                    .where(
+                        messages.c.session_id == conversation_id,
+                        messages.c.seq <= end,
+                        messages.c.seq > max(0, end - 20),
+                    )
+                    .order_by(messages.c.seq)
+                ).mappings()
+            )
+            complete = []
+            for i in range(len(rows) - 1):
+                a, b = rows[i], rows[i + 1]
+                if a["role"] == "user" and b["role"] == "assistant" and b["status"] == "completed":
+                    complete.extend([self.public_message(a), self.public_message(b)])
+            return {"messages": complete, "up_to_seq": end, "status": session["status"]}
 
     def delete(self, actor_id, conversation_id):
         with self.factory.begin() as s:

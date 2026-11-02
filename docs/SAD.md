@@ -249,6 +249,10 @@ flowchart LR
 
 ## 13. 变更控制
 
+每日一问案例与双向反问遵循用户[行为策略](policies/DAILY_QUESTION_AI.md)，实现决策见[ADR-015](adr/015-daily-thinking-companion.md)。规则由DiscussionPolicy按已授权探索上下文注入，ConversationRuntime不增加每日业务知识；用户可在正常消息流中请求修改思想总结，再手动收藏。无新增接口/字段、推荐调用或额外逐轮提炼。
+
+本次讨论体验与私有观点收藏扩展见 [ADR-014](adr/014-discussion-viewpoints.md)：discussion 唯一拥有收藏和按需提炼缓存；ConversationRuntime 仅暴露鉴权消息快照端口。新增接口与0004迁移为向后兼容扩展，不改变推荐边界。普通回复不额外提炼，候选必须手动收藏，AI改写明确标识来源；删除原会话一并清理关联候选及收藏，已结束但仍可访问的原会话允许只读回顾。
+
 冻结的是**契约和业务边界**，不是永远不许改变任何代码。变更 API/字段/模型策略前：
 1. 写 ADR (`docs/adr/NNN-topic.md`)：问题、备选、选择、影响与回滚。
 2. 在同一个 PR 中同步修改 `docs/SAD.md`、OpenAPI、数据库迁移、前后端 DTO 和测试。

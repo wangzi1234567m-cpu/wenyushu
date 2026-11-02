@@ -1,0 +1,45 @@
+# 本次修改文件
+
+基线：c8516f64d20ea5bc02ece8dd9eda781edac1ba2b。最终完整清单以PR Files changed为准。
+
+- README.md
+- backend/alembic/versions/0004_saved_viewpoints.py
+- backend/app/api/v1/routes.py
+- backend/app/api/v1/viewpoints.py
+- backend/app/api/viewpoint_dto.py
+- backend/app/bootstrap/container.py
+- backend/app/bootstrap/mock_viewpoints.py
+- backend/app/infrastructure/db/health.py
+- backend/app/modules/conversation/application/ports.py
+- backend/app/modules/conversation/application/service.py
+- backend/app/modules/conversation/infrastructure/repository.py
+- backend/app/modules/discussion/application/policy.py
+- backend/app/modules/discussion/application/service.py
+- backend/app/modules/discussion/application/viewpoints.py
+- backend/app/modules/discussion/infrastructure/models.py
+- backend/app/modules/discussion/infrastructure/viewpoints.py
+- backend/tests/test_contract.py
+- backend/tests/test_postgres.py
+- backend/tests/test_viewpoints.py
+- contracts/openapi.yaml
+- db/schema.sql
+- docs/DELIVERY.md
+- docs/SAD.md
+- docs/acceptance/DISCUSSION_QUALITY.md
+- docs/acceptance/DISCUSSION_VIEWPOINTS.md
+- docs/adr/014-discussion-viewpoints.md
+- docs/screenshots/discussion-viewpoints/desktop.png
+- docs/screenshots/discussion-viewpoints/mobile.png
+- web/src/app/discussion/[conversation_id]/page.tsx
+- web/src/app/globals.css
+- web/src/app/recommendations/page.tsx
+- web/src/app/saved-viewpoints/page.tsx
+- web/src/components/site/site-header.tsx
+- web/src/features/discussion/panel.tsx
+- web/src/features/viewpoints/api.ts
+- web/src/features/viewpoints/conversation-tools.tsx
+- web/src/features/viewpoints/saved-page.tsx
+- web/src/lib/api/client.ts
+- web/src/lib/api/schema.d.ts
+- web/tests/daily.spec.ts
+- web/tests/viewpoints.spec.ts

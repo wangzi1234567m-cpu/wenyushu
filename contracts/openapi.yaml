@@ -1680,6 +1680,432 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReportCreate'
+  /conversations/{conversation_id}/viewpoints:
+    get:
+      tags:
+      - Discussion
+      summary: Cached
+      operationId: getDiscussionViewpoints
+      security:
+      - ActorCookieAuth: []
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Conversation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewpointExtraction'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      tags:
+      - Discussion
+      summary: Extract
+      operationId: extractDiscussionViewpoints
+      security:
+      - ActorCookieAuth: []
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Conversation Id
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Csrf-Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewpointExtractionCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewpointExtraction'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /saved-viewpoints:
+    get:
+      tags:
+      - Discussion
+      summary: Listing
+      operationId: listSavedViewpoints
+      security:
+      - ActorCookieAuth: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: conversation_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Conversation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewpointPage'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      tags:
+      - Discussion
+      summary: Save
+      operationId: saveViewpoint
+      security:
+      - ActorCookieAuth: []
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Csrf-Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedViewpointCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewpoint'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /saved-viewpoints/{viewpoint_id}:
+    delete:
+      tags:
+      - Discussion
+      summary: Remove
+      operationId: removeSavedViewpoint
+      security:
+      - ActorCookieAuth: []
+      parameters:
+      - name: viewpoint_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Viewpoint Id
+      - name: X-CSRF-Token
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Csrf-Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+        '400':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: 失败时遵循统一错误契约
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 components:
   securitySchemes:
     ActorCookieAuth:
@@ -2461,6 +2887,186 @@ components:
       - step_id
       - option_id
       title: ExplorationAnswerRecord
+    ViewpointExtractionCreate:
+      properties:
+        up_to_seq:
+          type: integer
+          minimum: 1.0
+          title: Up To Seq
+      additionalProperties: false
+      type: object
+      required:
+      - up_to_seq
+      title: ViewpointExtractionCreate
+    ViewpointCandidate:
+      properties:
+        viewpoint_id:
+          type: string
+          format: uuid
+          title: Viewpoint Id
+        content:
+          type: string
+          maxLength: 240
+          minLength: 12
+          title: Content
+        source_message_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 4
+          minItems: 1
+          title: Source Message Ids
+      additionalProperties: false
+      type: object
+      required:
+      - viewpoint_id
+      - content
+      - source_message_ids
+      title: ViewpointCandidate
+    ViewpointExtraction:
+      properties:
+        extraction_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Extraction Id
+        up_to_seq:
+          type: integer
+          minimum: 0.0
+          title: Up To Seq
+        status:
+          type: string
+          enum:
+          - not_requested
+          - processing
+          - succeeded
+          - failed
+          title: Status
+        items:
+          items:
+            $ref: '#/components/schemas/ViewpointCandidate'
+          type: array
+          maxItems: 3
+          title: Items
+      additionalProperties: false
+      type: object
+      required:
+      - extraction_id
+      - up_to_seq
+      - status
+      - items
+      title: ViewpointExtraction
+    SavedViewpointCreate:
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          title: Conversation Id
+        message_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Message Id
+        extraction_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Extraction Id
+        item_index:
+          anyOf:
+          - type: integer
+            maximum: 2.0
+            minimum: 0.0
+          - type: 'null'
+          title: Item Index
+      additionalProperties: false
+      type: object
+      required:
+      - conversation_id
+      title: SavedViewpointCreate
+    SavedViewpoint:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        conversation_id:
+          type: string
+          format: uuid
+          title: Conversation Id
+        message_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Message Id
+        source_message_ids:
+          items:
+            type: string
+            format: uuid
+          type: array
+          maxItems: 4
+          minItems: 1
+          title: Source Message Ids
+        source_type:
+          type: string
+          enum:
+          - user_quote
+          - ai_viewpoint
+          - ai_summary
+          title: Source Type
+        content:
+          type: string
+          maxLength: 16000
+          minLength: 1
+          title: Content
+        topic_title:
+          type: string
+          maxLength: 300
+          title: Topic Title
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        source_available:
+          type: boolean
+          title: Source Available
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - conversation_id
+      - message_id
+      - source_message_ids
+      - source_type
+      - content
+      - topic_title
+      - created_at
+      - source_available
+      title: SavedViewpoint
+    SavedViewpointPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/SavedViewpoint'
+          type: array
+          title: Items
+        next_offset:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Next Offset
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - next_offset
+      title: SavedViewpointPage
 x-contract-rules:
   all_writes_require_csrf_except_anonymous_session_creation: true
   request_id_response_header: X-Request-ID

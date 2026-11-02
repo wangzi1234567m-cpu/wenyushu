@@ -133,6 +133,10 @@ git push origin mvp-p1
 
 ## F. 验收记录模板（每阶段复制）
 
+每日一问案例/反问及用户行为策略的有限调整见 [DAILY_THINKING_COMPANION](acceptance/DAILY_THINKING_COMPANION.md)。验收需同时检查策略上下文、用户反问直答、单一推进点、假设与事实区分、停止追问、总结归属和改写、入口草稿不自动发送，以及原历史/收藏/安全回归；不以提示词文本存在或Mock输出判断真实语义质量。
+
+本次有限范围补充“思辨助手体验与观点收藏”单独验收，不视为后续推荐/检索阶段完成。范围与测试证据见 [验收记录](acceptance/DISCUSSION_VIEWPOINTS.md)、[真实模型试答](acceptance/DISCUSSION_QUALITY.md) 和 [ADR-014](adr/014-discussion-viewpoints.md)。需检查消息原文/AI提炼的来源区分、刷新持久化、返回原消息、跨身份隔离、提炼幂等及失败恢复、删除原会话的隐私清理；仍须CI和人工产品验收后另行授权合并。
+
 ```markdown
 # Pn 验收记录
 - PR：

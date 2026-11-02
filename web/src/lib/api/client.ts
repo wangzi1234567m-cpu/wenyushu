@@ -10,14 +10,14 @@ export class ApiError extends Error {
 }
 
 let csrfToken: string | undefined;
-export async function request<T>(path: string, method: string, body?: unknown, key?: string, refreshed = false): Promise<T> {
+export async function request<T>(path: string, method: string, body?: unknown, key?: string, refreshed = false, timeoutMs = 10000): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     method, credentials: "same-origin", cache: "no-store",
     headers: { ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
       ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
       ...(key ? { "Idempotency-Key": key } : {}) },
     body: body !== undefined ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(10000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!response.ok) {
     let detail: ApiErrorBody["error"];
@@ -25,7 +25,7 @@ export async function request<T>(path: string, method: string, body?: unknown, k
     catch { detail = { code: "NETWORK_ERROR", message: "暂时无法连接，请重试", retryable: true, request_id: "" }; }
     if (detail.code === "CSRF_REJECTED" && !refreshed && path !== "/auth/anonymous-session") {
       await bootstrapSession();
-      return request<T>(path, method, body, key, true);
+      return request<T>(path, method, body, key, true, timeoutMs);
     }
     throw new ApiError(response.status, detail);
   }

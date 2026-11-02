@@ -24,7 +24,7 @@ test("stance, multiple reasons, persistent discussion and optional book navigati
   await complete(page);
   const discussion = page.getByRole("region", { name: "持续讨论", exact: true });
   await expect(discussion.getByText("AI 演示 · Mock", { exact: true })).toBeVisible();
-  await expect(discussion.locator(".message.assistant")).toContainText("你的判断会改变吗");
+  await expect(discussion.locator(".message.assistant")).toContainText("影响与控制的区别");
   await expect(discussion.getByRole("button", { name: "发送", exact: true })).toBeVisible();
   await discussion.getByRole("textbox").fill("现在我改变看法了，我反对控制别人的选择");
   await discussion.getByRole("button", { name: "发送", exact: true }).click();
@@ -64,8 +64,12 @@ test("failed answer retains input, revision creates a new exploration", async ({
   await page.getByRole("button", { name: "修改第 1 步", exact: true }).click();
   await page.getByRole("button", { name: "恢复前面的答案", exact: true }).click();
   await page.getByRole("radio").nth(1).check();
+  const selected = await page.getByRole("radio").nth(1).inputValue();
+  const answerResponse = page.waitForResponse((response) => /\/explorations\/[^/]+\/answers$/.test(response.url()) && response.request().method() === "POST" && response.ok());
   await page.getByRole("button", { name: "继续", exact: true }).click();
-  await expect(page.getByRole("checkbox", { name: "对方应保留选择爱谁的自由", exact: true })).toBeVisible();
+  const revised = await (await answerResponse).json();
+  expect(revised.answers[0].option_id).toBe(selected);
+  await expect(page.getByRole("checkbox", { name: revised.next_step.options[0].label, exact: true })).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem("wqs.daily.exploration")!).id)).not.toBe(before);
 });
 
@@ -85,6 +89,36 @@ test("stream failure is visible and explicit retry keeps the same client id", as
     if (/\/conversations\/[^/]+\/messages$/.test(request.url()) && request.method() === "POST") retriedId = request.postDataJSON().client_message_id;
   });
   await discussion.getByRole("button", { name: "重试上一条消息", exact: true }).click();
-  await expect(discussion.locator(".message.assistant")).toContainText("你的判断会改变吗");
+  await expect(discussion.locator(".message.assistant")).toContainText("影响与控制的区别");
   expect(retriedId).toBe(failedId);
+});
+
+test("case and counterquestion drafts remain editable and require explicit send", async ({ page }) => {
+  let generations = 0;
+  page.on("request", (request) => {
+    if (/\/conversations\/[^/]+\/messages$/.test(request.url()) && request.method() === "POST") generations++;
+  });
+  await complete(page);
+  const chat = page.getByRole("region", { name: "持续讨论", exact: true });
+  await expect(chat.getByRole("button", { name: "收藏AI 消息原文", exact: true })).toBeVisible();
+  await expect(chat.getByRole("button", { name: "停止回复", exact: true })).toHaveCount(0);
+  const before = generations;
+  const input = chat.getByRole("textbox");
+  await chat.getByRole("button", { name: "用案例继续", exact: true }).click();
+  await expect(input).toHaveValue(/贴近现实/);
+  expect(generations).toBe(before);
+  await expect(chat.getByRole("button", { name: "我想反问", exact: true })).toBeDisabled();
+  await input.fill("");
+  await chat.getByRole("button", { name: "我想反问", exact: true }).click();
+  await expect(input).toHaveValue("我想反问你：");
+  expect(generations).toBe(before);
+  const question = "我想反问你：如果对方仍可拒绝，你为什么还认为这是控制？";
+  await input.fill(question);
+  await chat.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(chat.getByRole("button", { name: "停止回复", exact: true })).toHaveCount(0);
+  await expect(chat.locator(".message.user").filter({ hasText: question }).getByRole("button", { name: "收藏用户原话", exact: true })).toBeVisible();
+  expect(generations).toBe(before + 1);
+  await page.reload();
+  await expect(chat.getByText(question, { exact: true })).toBeVisible();
+  expect(generations).toBe(before + 1);
 });

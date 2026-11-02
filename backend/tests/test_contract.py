@@ -31,6 +31,9 @@ def test_full_contract_and_implemented_runtime(foundation):
         "/api/v1/health/live",
         "/api/v1/health/ready",
         "/api/v1/topics",
+        "/api/v1/saved-viewpoints",
+        "/api/v1/saved-viewpoints/{viewpoint_id}",
+        "/api/v1/conversations/{conversation_id}/viewpoints",
         "/api/v1/conversations",
         "/api/v1/conversations/{conversation_id}",
         "/api/v1/conversations/{conversation_id}/messages",
@@ -55,6 +58,12 @@ def test_full_contract_and_implemented_runtime(foundation):
                     expected["responses"][status]["content"]
                 )
     for name in (
+        "ViewpointExtractionCreate",
+        "ViewpointCandidate",
+        "ViewpointExtraction",
+        "SavedViewpointCreate",
+        "SavedViewpoint",
+        "SavedViewpointPage",
         "ConversationCreate",
         "Conversation",
         "ConversationMessage",
