@@ -95,7 +95,7 @@ export function DiscussionPanel({ explorationId, conversationId, sourceMessageId
   return <div className="discussion-layout">
     <section className="discussion" aria-label="持续讨论">
       <div className="discussion-title"><h3>把想法再展开一点</h3><span className="soon">{conversation?.provider_mode === "mock" ? "AI 演示 · Mock" : "AI 生成 · DeepSeek"}</span></div>
-      <p className="note">可以赞同、反驳，也可以改变主意。AI 回复可能有误，请保留自己的判断。</p>
+      <p className="note">可以赞同、举反例，也可以向 AI 反问、要求它解释理由。AI 回复可能有误，请保留自己的判断。</p>
       <div className="messages" aria-live="polite" aria-busy={busy}>
         {messages.map((message) => <article key={message.id} id={`message-${message.id}`} data-source={message.id === sourceMessageId ? "true" : undefined} className={`message ${message.role}`}>
           <span className="message-role">{message.role === "user" ? "你" : "问与书 · AI"}</span>
@@ -114,9 +114,13 @@ export function DiscussionPanel({ explorationId, conversationId, sourceMessageId
         event.preventDefault(); if (!conversation || readOnly || !text.trim() || busy || generating) return;
         const draft = { client_message_id: crypto.randomUUID(), content: text.trim() }; setText(""); void send(conversation.conversation_id, draft);
       }}>
-        <label className="supplement" htmlFor="discussion-input">继续说说你的想法</label>
+        <label className="supplement" htmlFor="discussion-input">继续表达，或向 AI 反问</label>
         {readOnly && <p className="note">这段讨论已结束或过期，仍可回顾原文与收藏。</p>}
-        <textarea id="discussion-input" maxLength={4000} value={text} onChange={(event) => setText(event.target.value)} disabled={!ready || readOnly} />
+        <div className="discussion-prompts" aria-label="讨论提示">
+          {[{ label: "用案例继续", draft: "能不能用一个贴近现实的具体情境说明，并解释它与我们讨论的观点有什么联系和区别？" }, { label: "我想反问", draft: "我想反问你：" }].map((item) => <button key={item.label} type="button" disabled={!ready || readOnly || busy || generating || !!text.trim()} onClick={() => { setText(item.draft); document.getElementById("discussion-input")?.focus(); }}>{item.label}</button>)}
+          <span className="note">可改写后再发送。</span>
+        </div>
+        <textarea id="discussion-input" placeholder="你为什么这样判断？有没有相反的例子？也欢迎直接说出你的想法。" maxLength={4000} value={text} onChange={(event) => setText(event.target.value)} disabled={!ready || readOnly} />
         <div className="composer-actions"><span className="count">{Array.from(text).length}/4000</span>
           {busy ? <button type="button" onClick={() => controller.current?.abort()}>停止回复</button> : <button className="primary" disabled={!ready || readOnly || !text.trim() || generating}>发送</button>}
         </div>

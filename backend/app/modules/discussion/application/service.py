@@ -5,7 +5,7 @@ from uuid import NAMESPACE_URL, uuid4, uuid5
 from app.integrations.llm.ports import ChatMessage
 from app.modules.content.application.ports import DailyQuestionReader
 from app.modules.conversation.application.ports import ConversationSessionPort
-from app.modules.discussion.application.policy import DISCUSSION_PROMPT
+from app.modules.discussion.application.policy import DAILY_DEBATE_PROMPT, DISCUSSION_PROMPT
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -40,10 +40,13 @@ class DiscussionPolicy:
 
     def context(self, actor, key):
         seed = self.contexts.get(actor, key)
+        prompt = DISCUSSION_PROMPT
+        if seed.get("question_version_id"):
+            prompt += "\n\n" + DAILY_DEBATE_PROMPT
         return [
             ChatMessage(
                 "system",
-                DISCUSSION_PROMPT,
+                prompt,
             ),
             ChatMessage(
                 "user",
