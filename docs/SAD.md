@@ -249,6 +249,8 @@ flowchart LR
 
 ## 13. 变更控制
 
+每日一问当前采用用户指定的[System Prompt V1.0原文](../backend/app/modules/discussion/application/prompts/daily_question_v1.md)，作为服务端唯一文本来源，取代旧版每日附加策略；一般讨论策略保留。见[ADR-016](adr/016-daily-system-prompt-v1.md)。原文的阅读联动责任不等于能力已开放，当前运行边界禁止伪造检索/推荐/工具执行。
+
 每日一问案例与双向反问遵循用户[行为策略](policies/DAILY_QUESTION_AI.md)，实现决策见[ADR-015](adr/015-daily-thinking-companion.md)。规则由DiscussionPolicy按已授权探索上下文注入，ConversationRuntime不增加每日业务知识；用户可在正常消息流中请求修改思想总结，再手动收藏。无新增接口/字段、推荐调用或额外逐轮提炼。
 
 本次讨论体验与私有观点收藏扩展见 [ADR-014](adr/014-discussion-viewpoints.md)：discussion 唯一拥有收藏和按需提炼缓存；ConversationRuntime 仅暴露鉴权消息快照端口。新增接口与0004迁移为向后兼容扩展，不改变推荐边界。普通回复不额外提炼，候选必须手动收藏，AI改写明确标识来源；删除原会话一并清理关联候选及收藏，已结束但仍可访问的原会话允许只读回顾。
